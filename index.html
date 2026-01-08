@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SomaliTube</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background-color: #f9f9f9; color: #111; }
+
+    /* Navbar */
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background-color: #ff4500; color: white; }
+    .navbar h1 { font-size: 1.8rem; cursor: pointer; }
+    .nav-buttons button { margin-left: 1rem; padding: 0.6rem 1.2rem; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: transform 0.2s, box-shadow 0.2s; }
+    .nav-buttons button:hover { transform: scale(1.1); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .login-btn { background-color: white; color: #ff4500; }
+    .signup-btn { background-color: #ffad60; color: #111; }
+    .upload-btn { background-color: #4CAF50; color: white; }
+
+    /* Search bar */
+    .search-container { display: flex; justify-content: center; padding: 1rem 0; }
+    .search-container input { width: 50%; padding: 0.5rem 1rem; border-radius: 25px; border: 1px solid #ccc; font-size: 1rem; outline: none; transition: 0.2s; }
+    .search-container input:focus { border-color: #ff4500; }
+
+    /* Video grid */
+    .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; padding: 2rem; }
+    .video-card { background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; cursor: pointer; }
+    .video-card:hover { transform: translateY(-5px); }
+    .video-card img { width: 100%; height: auto; }
+    .video-info { padding: 0.8rem; }
+    .video-info h3 { font-size: 1.1rem; margin-bottom: 0.3rem; }
+    .video-info p { font-size: 0.9rem; color: #555; }
+    .watch-btn { display: inline-block; margin-top: 0.5rem; padding: 0.4rem 0.8rem; background-color: #ff4500; color: white; border: none; border-radius: 5px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .watch-btn:hover { transform: scale(1.1); box-shadow: 0 5px 10px rgba(0,0,0,0.2); }
+
+    footer { text-align: center; padding: 2rem 0; color: #888; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <h1>SomaliTube</h1>
+    <div class="nav-buttons">
+      <button class="login-btn" onclick="login()">Login</button>
+      <button class="signup-btn" onclick="signup()">Sign Up</button>
+      <button class="upload-btn" onclick="uploadVideo()">Upload Video</button>
+    </div>
+  </nav>
+
+  <!-- Search Bar -->
+  <div class="search-container">
+    <input type="text" placeholder="Search videos..." oninput="searchVideos(this.value)">
+  </div>
+
+  <!-- Video Grid -->
+  <div class="video-grid" id="videoGrid"></div>
+
+  <footer>&copy; 2026 SomaliTube. All rights reserved.</footer>
+
+  <script>
+    const videos = [
+      { title: "Somali Music Video 1", thumbnail: "https://via.placeholder.com/400x225.png?text=Video+1" },
+      { title: "Somali Vlog 2", thumbnail: "https://via.placeholder.com/400x225.png?text=Video+2" },
+      { title: "Cooking Tutorial 3", thumbnail: "https://via.placeholder.com/400x225.png?text=Video+3" },
+      { title: "Travel Somalia 4", thumbnail: "https://via.placeholder.com/400x225.png?text=Video+4" },
+      { title: "Comedy Skit 5", thumbnail: "https://via.placeholder.com/400x225.png?text=Video+5" },
+      { title: "Tech Review 6", thumbnail: "https://via.placeholder.com/400x225.png?text=Video+6" }
+    ];
+
+    const videoGrid = document.getElementById('videoGrid');
+
+    function displayVideos(videosToShow) {
+      videoGrid.innerHTML = '';
+      videosToShow.forEach(video => {
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.innerHTML = `
+          <img src="${video.thumbnail}" alt="${video.title}">
+          <div class="video-info">
+            <h3>${video.title}</h3>
+            <p>SomaliTube • 1k views</p>
+            <button class="watch-btn" onclick="watchVideo('${video.title}')">Watch</button>
+          </div>
+        `;
+        videoGrid.appendChild(card);
+      });
+    }
+
+    displayVideos(videos);
+
+    function searchVideos(query) {
+      const filtered = videos.filter(v => v.title.toLowerCase().includes(query.toLowerCase()));
+      displayVideos(filtered);
+    }
+
+    function login() { alert('Login clicked!'); }
+    function signup() { alert('Sign Up clicked!'); }
+    function uploadVideo() { alert('Upload Video clicked!'); }
+    function watchVideo(title) { alert('Now watching: ' + title); }
+  </script>
+
+</body>
+</html>
