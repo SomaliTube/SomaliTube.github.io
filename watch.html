@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Watch | SomaliTube</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    video {
+      width: 100%;
+      height: 500px;
+      background: black;
+    }
+
+    h1 { margin-top: 1rem; }
+    p { color: #aaa; }
+
+    a {
+      color: #ff4500;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+
+<a href="index.html">⬅ Back to Home</a>
+
+<div class="container">
+  <video id="videoPlayer" controls></video>
+
+  <h1 id="title"></h1>
+  <p id="channel"></p>
+  <p id="views"></p>
+</div>
+
+<script>
+  // SAME VIDEO LIST AS index.html
+  const videos = {
+    video1: {
+      title: "My First Somali Video",
+      channel: "Abdi Somali",
+      views: "1.2K views",
+      src: "sample.mp4"
+    },
+
+    video2: {
+      title: "Another Somali Banger",
+      channel: "Somali Beats",
+      views: "532 views",
+      src: "sample2.mp4"
+    }
+  };
+
+  // GET VIDEO ID FROM URL
+  const params = new URLSearchParams(window.location.search);
+  const videoId = params.get("v");
+
+  const video = videos[videoId];
+
+  if (video) {
+    document.getElementById("title").textContent = video.title;
+    document.getElementById("channel").textContent = video.channel;
+    document.getElementById("views").textContent = video.views;
+
+    const player = document.getElementById("videoPlayer");
+    player.src = video.src;
+  } else {
+    document.body.innerHTML = "<h1>bro am i serching but cant find vedeo😢</h1>";
+  }
+</script>
+
+</body>
+</html>
