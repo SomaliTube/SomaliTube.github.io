@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - SomaliTube</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #f5f5f5;
+      font-family: Verdana, Geneva, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    #topbar {
+      background: #fff;
+      border-bottom: 4px solid #ff6a00;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+    }
+    #logo {
+      font-size: 26px;
+      font-weight: 900;
+      color: #111;
+      text-decoration: none;
+      font-family: Impact, fantasy;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    #logo span { color: #ff6a00; }
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+    .box {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 420px;
+    }
+    h1 {
+      font-size: 20px;
+      font-family: Impact, fantasy;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      color: #111;
+    }
+    h1 span { color: #ff6a00; }
+    .field { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: bold;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    input[type=text], input[type=email], input[type=password] {
+      width: 100%;
+      height: 38px;
+      border: 1px solid #ccc;
+      background: #fff;
+      font-size: 13px;
+      font-family: Verdana, sans-serif;
+      padding: 0 12px;
+      outline: none;
+      color: #111;
+    }
+    input:focus { border-color: #ff6a00; }
+    .avatar-preview {
+      width: 80px;
+      height: 80px;
+      background: #eee;
+      border: 2px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .btn {
+      width: 100%;
+      height: 42px;
+      background: #ff6a00;
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+      font-family: Verdana, sans-serif;
+      cursor: pointer;
+      margin-top: 8px;
+      letter-spacing: 0.5px;
+    }
+    .btn:hover { background: #e05a00; }
+    .msg {
+      margin-top: 12px;
+      font-size: 12px;
+      color: red;
+      min-height: 18px;
+    }
+    .msg.success { color: green; }
+    .login-link {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #777;
+      text-align: center;
+    }
+    .login-link a { color: #ff6a00; text-decoration: none; }
+    .login-link a:hover { text-decoration: underline; }
+    footer {
+      background: #fff;
+      border-top: 4px solid #ff6a00;
+      padding: 14px 20px;
+      font-size: 11px;
+      color: #aaa;
+      font-family: Verdana, sans-serif;
+    }
+    footer a { color: #ff6a00; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="index.html" id="logo">Somali<span>Tube</span></a>
+</div>
+
+<main>
+  <div class="box">
+    <h1>Create <span>Account</span></h1>
+
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="e.g. SomaliKing99" />
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="you@email.com" />
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Min. 6 characters" />
+    </div>
+
+    <div class="field">
+      <label>Profile Picture</label>
+      <input type="file" id="pfp-input" accept="image/*" style="font-size:12px;" />
+      <div class="avatar-preview" id="avatar-preview">No image</div>
+    </div>
+
+    <button class="btn" id="signup-btn">Sign Up</button>
+    <div class="msg" id="msg"></div>
+    <div class="login-link">Already have an account? <a href="login.html">Log in</a></div>
+  </div>
+</main>
+
+<footer>
+  <span>&copy; 2025 SomaliTube.</span>
+  <span>|</span>
+  <span>Contact: <a href="mailto:arneper606@gmail.com">arneper606@gmail.com</a></span>
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDxOI-TwU5Sd7yYm1sfceb1HXGYMAQX3kw",
+    authDomain: "somalitube98.firebaseapp.com",
+    projectId: "somalitube98",
+    storageBucket: "somalitube98.firebasestorage.app",
+    messagingSenderId: "301195499282",
+    appId: "1:301195499282:web:b89255bba0f5ed1eba05cb"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  // Preview profile picture
+  const pfpInput = document.getElementById('pfp-input');
+  const avatarPreview = document.getElementById('avatar-preview');
+  pfpInput.addEventListener('change', () => {
+    const file = pfpInput.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      avatarPreview.innerHTML = `<img src="${url}" />`;
+    }
+  });
+
+  document.getElementById('signup-btn').addEventListener('click', async () => {
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const msg = document.getElementById('msg');
+
+    if (!username || !email || !password) {
+      msg.textContent = 'Please fill in all fields.';
+      return;
+    }
+
+    try {
+      msg.textContent = 'Creating account...';
+      msg.className = 'msg';
+
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCred.user;
+
+      let pfpURL = '';
+
+      // Upload profile picture if selected
+      if (pfpInput.files[0]) {
+        const storageRef = ref(storage, `pfps/${user.uid}`);
+        await uploadBytes(storageRef, pfpInput.files[0]);
+        pfpURL = await getDownloadURL(storageRef);
+      }
+
+      // Update auth profile
+      await updateProfile(user, {
+        displayName: username,
+        photoURL: pfpURL
+      });
+
+      // Save to Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        username,
+        email,
+        pfpURL,
+        createdAt: new Date().toISOString()
+      });
+
+      msg.textContent = 'Account created! Redirecting...';
+      msg.className = 'msg success';
+      setTimeout(() => window.location.href = 'index.html', 1500);
+
+    } catch (err) {
+      msg.className = 'msg';
+      if (err.code === 'auth/email-already-in-use') msg.textContent = 'That email is already registered.';
+      else if (err.code === 'auth/weak-password') msg.textContent = 'Password must be at least 6 characters.';
+      else if (err.code === 'auth/invalid-email') msg.textContent = 'Invalid email address.';
+      else msg.textContent = err.message;
+    }
+  });
+</script>
+</body>
+</html>
