@@ -36,17 +36,17 @@
 <div id="topbar"><a href="index.html" id="logo">SOMALITUBE!!!!</a></div>
 <main>
   <div class="box">
-    <h1>Join <span>SomaliTube</span></h1>
-    <div class="field"><label>Username</label><input type="text" id="username" placeholder="e.g. SomaliKing99" /></div>
-    <div class="field"><label>Email</label><input type="email" id="email" placeholder="you@email.com" /></div>
-    <div class="field"><label>Password</label><input type="password" id="password" placeholder="Min. 6 characters" /></div>
-    <div class="field"><label>Bio (optional)</label><textarea id="bio" placeholder="Tell people who you are..."></textarea></div>
-    <button class="btn" id="signup-btn">CREATE ACCOUNT 🚀</button>
+    <h1>Join de <span>ultaimate SomaliTube!</span></h1>
+    <div class="field"><label>Username..</label><input type="text" id="username" placeholder="e.g. SomaliNigger123" /></div>
+    <div class="field"><label>Email....</label><input type="email" id="email" placeholder="william@anus.com" /></div>
+    <div class="field"><label>Password....</label><input type="password" id="password" placeholder="make one..." /></div>
+    <div class="field"><label>Bio (no need)</label><textarea id="bio" placeholder="Tell all somalians who u is"></textarea></div>
+    <button class="btn" id="signup-btn">CreeATE CHANAL!</button>
     <div class="msg" id="msg"></div>
-    <div class="link">Already have an account? <a href="login.html">Log in</a></div>
+    <div class="link">Alredy got chanal ok? <a href="login.html">log back in to chanal</a></div>
   </div>
 </main>
-<footer><span>&copy; 2025 SomaliTube.</span><span> | </span><span>Contact: <a href="mailto:arneper606@gmail.com">arneper606@gmail.com</a></span></footer>
+<footer><span>&copy; 1925 SomaliTube.</span><span> | </span><span>Contact: <a href="mailto:arneper606@gmail.com">arneper606@gmail.com</a></span></footer>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -59,23 +59,23 @@
     var password = document.getElementById('password').value;
     var bio = document.getElementById('bio').value.trim();
     var msg = document.getElementById('msg');
-    if (!username || !email || !password) { msg.textContent = 'Fill in all fields!'; return; }
-    msg.className = 'msg'; msg.textContent = 'Checking username...';
+    if (!username || !email || !password) { msg.textContent = 'Fill in all stuff nigga!'; return; }
+    msg.className = 'msg'; msg.textContent = 'Checking de username...';
     db.collection('users').where('usernameLower', '==', username.toLowerCase()).get().then(function(snap) {
-      if (!snap.empty) { msg.textContent = 'Username already taken!'; return; }
-      msg.textContent = 'Creating account...';
+      if (!snap.empty) { msg.textContent = 'Username IS FUCKIN TAKEN!'; return; }
+      msg.textContent = 'Creating chanal....';
       auth.createUserWithEmailAndPassword(email, password).then(function(userCred) {
         var user = userCred.user;
         user.updateProfile({ displayName: username }).then(function() {
           db.collection('users').doc(user.uid).set({ username: username, usernameLower: username.toLowerCase(), email: email, bio: bio, pfpURL: '', createdAt: new Date().toISOString() }).then(function() {
-            msg.className = 'msg success'; msg.textContent = 'Account created! Welcome to SomaliTube! 🎉';
+            msg.className = 'msg success'; msg.textContent = 'Account created! Welcome to ultimate hub of somali PORN!';
             setTimeout(function() { window.location.href = 'index.html'; }, 1500);
           });
         });
       }).catch(function(err) {
         msg.className = 'msg';
-        if (err.code === 'auth/email-already-in-use') msg.textContent = 'That email is already registered!';
-        else if (err.code === 'auth/weak-password') msg.textContent = 'Password must be at least 6 characters!';
+        if (err.code === 'auth/email-already-in-use') msg.textContent = 'dis email is register here ok? u lie? do other email?';
+        else if (err.code === 'auth/weak-password') msg.textContent = 'password musts be atlest de 6 lettar!';
         else msg.textContent = 'Error: ' + err.message;
       });
     });
