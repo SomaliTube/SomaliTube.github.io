@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Channels - SomaliTube</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; color: #f1f1f1; font-family: 'Nunito', Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    #topbar { background: #1a1a1a; border-bottom: 4px solid #ff6a00; height: 68px; display: flex; align-items: center; padding: 0 16px; gap: 10px; position: sticky; top: 0; z-index: 100; }
+    #logo { font-family: 'Bangers', Impact, fantasy; font-size: 32px; color: #fff; text-decoration: none; letter-spacing: 2px; text-shadow: 3px 3px 0px #ff6a00; white-space: nowrap; }
+    #logo span { color: #ff6a00; text-shadow: 3px 3px 0px #111; }
+    #search-wrap { display: flex; flex: 1; max-width: 400px; margin: 0 auto; }
+    #search-input { flex: 1; height: 36px; background: #2a2a2a; border: 2px solid #333; border-right: none; color: #fff; font-size: 13px; font-family: 'Nunito', sans-serif; padding: 0 12px; outline: none; }
+    #search-input:focus { border-color: #ff6a00; }
+    #search-btn { height: 36px; padding: 0 16px; background: #ff6a00; border: 2px solid #ff6a00; color: #fff; font-size: 12px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; }
+    .topbar-btn { height: 34px; padding: 0 14px; font-size: 12px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; border: 2px solid #ff6a00; white-space: nowrap; }
+    .topbar-btn.outline { background: transparent; color: #ff6a00; }
+    .topbar-btn.outline:hover { background: #ff6a00; color: #fff; }
+    .topbar-btn.fill { background: #ff6a00; color: #fff; }
+    .topbar-btn.fill:hover { background: #e05a00; }
+    #auth-area { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .auth-btn { height: 36px; padding: 0 20px; font-size: 13px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; border: 2px solid #ff6a00; }
+    #btn-login { background: transparent; color: #ff6a00; }
+    #btn-login:hover { background: #ff6a00; color: #fff; }
+    #btn-signup { background: #ff6a00; color: #fff; }
+    #btn-signup:hover { background: #e05a00; }
+    main { flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 28px 16px; }
+    .section-label { font-family: 'Bangers', Impact, fantasy; font-size: 22px; color: #ff6a00; letter-spacing: 2px; margin-bottom: 16px; border-left: 5px solid #ff6a00; padding-left: 12px; }
+    .channels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+    .channel-card { background: #1e1e1e; border: 2px solid #2a2a2a; padding: 20px 16px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; text-decoration: none; transition: border-color 0.15s, transform 0.15s; }
+    .channel-card:hover { border-color: #ff6a00; transform: translateY(-3px); }
+    .ch-avatar { width: 70px; height: 70px; background: #ff6a00; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; color: #fff; font-family: 'Bangers', Impact, fantasy; margin-bottom: 10px; border: 3px solid #e05a00; }
+    .ch-name { font-size: 14px; font-weight: 900; color: #f1f1f1; }
+    .ch-subs { font-size: 11px; color: #666; margin-top: 4px; }
+    .loading { font-size: 13px; color: #666; }
+    footer { background: #1a1a1a; border-top: 4px solid #ff6a00; padding: 14px 20px; text-align: center; font-size: 12px; color: #444; }
+    footer a { color: #ff6a00; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div id="topbar">
+  <a href="index.html" id="logo">Somali<span>Tube</span></a>
+  <div id="search-wrap"><input type="text" id="search-input" placeholder="Search" /><button id="search-btn">GO</button></div>
+  <a href="channels.html" class="topbar-btn outline">All Channels</a>
+  <div id="upload-btn-wrap"></div>
+  <div id="auth-area">
+    <a href="login.html" class="auth-btn" id="btn-login">Log In</a>
+    <a href="signup.html" class="auth-btn" id="btn-signup">Sign Up</a>
+  </div>
+</div>
+<main>
+  <div class="section-label">👥 All Channels</div>
+  <div class="channels-grid" id="channels-grid"><div class="loading">Loading channels...</div></div>
+</main>
+<footer><span>&copy; 2025 SomaliTube.</span><span> | </span><span>Contact: <a href="mailto:arneper606@gmail.com">arneper606@gmail.com</a></span></footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  firebase.initializeApp({ apiKey: "AIzaSyDxOI-TwU5Sd7yYm1sfceb1HXGYMAQX3kw", authDomain: "somalitube98.firebaseapp.com", projectId: "somalitube98", storageBucket: "somalitube98.firebasestorage.app", messagingSenderId: "301195499282", appId: "1:301195499282:web:b89255bba0f5ed1eba05cb" });
+  var auth = firebase.auth();
+  var db = firebase.firestore();
+  auth.onAuthStateChanged(function(user) {
+    var authArea = document.getElementById('auth-area');
+    var uploadWrap = document.getElementById('upload-btn-wrap');
+    if (user) {
+      var initial = (user.displayName || '?')[0].toUpperCase();
+      authArea.innerHTML = '<a href="profile.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#f1f1f1;"><div style="width:38px;height:38px;background:#ff6a00;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;font-family:Bangers,Impact,fantasy;">' + initial + '</div><span style="font-size:13px;font-weight:900;">' + (user.displayName||'Profile') + '</span></a>';
+      uploadWrap.innerHTML = '<a href="https://docs.google.com/forms/d/e/1FAIpQLSesVkUCUFMIIiHSAhhaGc3zPu1Fk8IJroeHty4TWqTGf13wog/viewform?usp=header" target="_blank" class="topbar-btn fill">🎬 Upload</a>';
+    }
+  });
+  db.collection('users').get().then(function(snap) {
+    var grid = document.getElementById('channels-grid');
+    if (snap.empty) { grid.innerHTML = '<div class="loading">No channels yet. Be the first! 👀</div>'; return; }
+    grid.innerHTML = '';
+    snap.forEach(function(doc) {
+      var d = doc.data();
+      var initial = (d.username || '?')[0].toUpperCase();
+      grid.innerHTML += '<a href="user.html?uid=' + doc.id + '" class="channel-card"><div class="ch-avatar">' + initial + '</div><div class="ch-name">' + (d.username||'Unknown') + '</div><div class="ch-subs" id="subs-' + doc.id + '">...</div></a>';
+    });
+    snap.forEach(function(doc) {
+      db.collection('users').doc(doc.id).collection('subscribers').get().then(function(s) {
+        var el = document.getElementById('subs-' + doc.id);
+        if (el) el.textContent = s.size + ' subscriber' + (s.size !== 1 ? 's' : '');
+      });
+    });
+  });
+</script>
+</body>
+</html>
