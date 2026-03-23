@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - SomaliTube</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; color: #f1f1f1; font-family: 'Nunito', Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    #topbar { background: #1a1a1a; border-bottom: 4px solid #ff6a00; height: 68px; display: flex; align-items: center; padding: 0 16px; gap: 10px; position: sticky; top: 0; z-index: 100; }
+    #logo { font-family: 'Bangers', Impact, fantasy; font-size: 28px; color: #fff; text-decoration: none; letter-spacing: 2px; text-shadow: 3px 3px 0px #ff6a00; white-space: nowrap; }
+    #search-wrap { display: flex; flex: 1; max-width: 400px; margin: 0 auto; }
+    #search-input { flex: 1; height: 36px; background: #2a2a2a; border: 2px solid #333; border-right: none; color: #fff; font-size: 13px; font-family: 'Nunito', sans-serif; padding: 0 12px; outline: none; }
+    #search-input:focus { border-color: #ff6a00; }
+    #search-btn { height: 36px; padding: 0 16px; background: #ff6a00; border: 2px solid #ff6a00; color: #fff; font-size: 12px; font-weight: 900; cursor: pointer; }
+    .topbar-btn { height: 34px; padding: 0 14px; font-size: 12px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; border: 2px solid #ff6a00; white-space: nowrap; }
+    .topbar-btn.outline { background: transparent; color: #ff6a00; }
+    .topbar-btn.outline:hover { background: #ff6a00; color: #fff; }
+    .topbar-btn.fill { background: #ff6a00; color: #fff; }
+    #auth-area { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .auth-btn { height: 36px; padding: 0 20px; font-size: 13px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; border: 2px solid #ff6a00; }
+    #btn-login { background: transparent; color: #ff6a00; }
+    #btn-signup { background: #ff6a00; color: #fff; }
+    main { flex: 1; max-width: 900px; width: 100%; margin: 0 auto; padding: 32px 16px; }
+    .profile-box { background: #1e1e1e; border: 2px solid #ff6a00; padding: 28px; margin-bottom: 24px; }
+    .top-row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; margin-bottom: 16px; }
+    .avatar { width: 90px; height: 90px; background: #ff6a00; border: 3px solid #e05a00; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; color: #fff; font-family: 'Bangers', Impact, fantasy; flex-shrink: 0; }
+    .info h2 { font-family: 'Bangers', Impact, fantasy; font-size: 28px; letter-spacing: 2px; color: #fff; text-shadow: 2px 2px 0px #ff6a00; }
+    .info p { font-size: 12px; color: #666; margin-top: 4px; }
+    .bio-display { font-size: 13px; color: #aaa; line-height: 1.6; margin-top: 12px; padding-top: 12px; border-top: 2px solid #2a2a2a; }
+    .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .sub-btn { height: 38px; padding: 0 22px; font-size: 13px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; border: 2px solid #ff6a00; background: #ff6a00; color: #fff; display: inline-flex; align-items: center; width: fit-content; }
+    .sub-btn.subbed { background: transparent; color: #ff6a00; }
+    .sub-btn:hover { background: #e05a00; color: #fff; border-color: #e05a00; }
+    .rating-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .rate-btn { height: 36px; padding: 0 16px; font-size: 14px; cursor: pointer; border: 2px solid #333; background: #2a2a2a; color: #f1f1f1; font-family: 'Nunito', sans-serif; font-weight: 900; display: inline-flex; align-items: center; gap: 6px; }
+    .rate-btn:hover { border-color: #ff6a00; }
+    .rate-btn.liked { background: #ff6a00; border-color: #ff6a00; color: #fff; }
+    .rate-btn.disliked { background: #333; border-color: #555; color: #fff; }
+    .rating-bar-bg { width: 120px; height: 8px; background: #2a2a2a; border: 1px solid #333; }
+    .rating-bar-fill { height: 8px; background: #ff6a00; }
+    .rating-pct { font-size: 12px; color: #ff6a00; font-weight: 900; }
+    .section-label { font-family: 'Bangers', Impact, fantasy; font-size: 22px; color: #ff6a00; letter-spacing: 2px; margin-bottom: 16px; border-left: 5px solid #ff6a00; padding-left: 12px; }
+    .empty { font-size: 13px; color: #555; padding: 16px 0; }
+
+    /* POSTS */
+    .post-box { background: #1e1e1e; border: 2px solid #2a2a2a; padding: 16px; margin-bottom: 16px; }
+    .post-box:hover { border-color: #ff6a00; }
+    .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .post-avatar { width: 36px; height: 36px; background: #ff6a00; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; color: #fff; font-family: 'Bangers', Impact, fantasy; flex-shrink: 0; }
+    .post-username { font-size: 13px; font-weight: 900; color: #ff6a00; }
+    .post-time { font-size: 11px; color: #444; margin-left: auto; }
+    .post-text { font-size: 14px; color: #f1f1f1; line-height: 1.6; margin-bottom: 12px; }
+    .post-comment-toggle { font-size: 12px; color: #ff6a00; font-weight: 900; cursor: pointer; background: none; border: none; padding: 0; font-family: 'Nunito', sans-serif; }
+    .post-comment-toggle:hover { text-decoration: underline; }
+    .post-comments { margin-top: 12px; border-top: 1px solid #2a2a2a; padding-top: 12px; display: none; }
+    .post-comment { display: flex; gap: 8px; margin-bottom: 10px; }
+    .pc-avatar { width: 28px; height: 28px; background: #ff6a00; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; color: #fff; font-family: 'Bangers', Impact, fantasy; flex-shrink: 0; text-decoration: none; }
+    .pc-body { flex: 1; }
+    .pc-username { font-size: 12px; font-weight: 900; color: #ff6a00; }
+    .pc-text { font-size: 12px; color: #ccc; margin-top: 2px; }
+    .post-comment-form { display: flex; gap: 8px; margin-top: 10px; }
+    .post-comment-input { flex: 1; height: 34px; background: #2a2a2a; border: 2px solid #333; color: #f1f1f1; font-size: 12px; font-family: 'Nunito', sans-serif; padding: 0 10px; outline: none; }
+    .post-comment-input:focus { border-color: #ff6a00; }
+    .post-comment-submit { height: 34px; padding: 0 14px; background: #ff6a00; border: none; color: #fff; font-size: 12px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; }
+    .post-write-wrap { display: flex; gap: 10px; margin-bottom: 20px; }
+    .post-write-input { flex: 1; min-height: 60px; padding: 10px 12px; background: #2a2a2a; border: 2px solid #333; color: #f1f1f1; font-size: 13px; font-family: 'Nunito', sans-serif; outline: none; resize: none; }
+    .post-write-input:focus { border-color: #ff6a00; }
+    .post-write-submit { height: 44px; padding: 0 20px; background: #ff6a00; border: none; color: #fff; font-size: 13px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; align-self: flex-end; }
+    .post-write-submit:hover { background: #e05a00; }
+
+    footer { background: #1a1a1a; border-top: 4px solid #ff6a00; padding: 14px 20px; text-align: center; font-size: 12px; color: #444; }
+    footer a { color: #ff6a00; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div id="topbar">
+  <a href="index.html" id="logo">SOMALITUBE!!!!</a>
+  <div id="search-wrap"><input type="text" id="search-input" placeholder="Serch for de keeg videos" /><button id="search-btn">GO</button></div>
+  <a href="channels.html" class="topbar-btn outline">Everi chanal</a>
+  <div id="upload-btn-wrap"></div>
+  <div id="auth-area">
+    <a href="login.html" class="auth-btn" id="btn-login">Log In</a>
+    <a href="signup.html" class="auth-btn" id="btn-signup">Sign Up</a>
+  </div>
+</div>
+<main>
+  <div id="profile-wrap">Loading...</div>
+
+  <div id="videos-section" style="display:none; margin-top:24px;">
+    <div class="section-label">🎬 Videos</div>
+    <div id="videos-wrap" class="empty">This channel has no videos yet.</div>
+  </div>
+
+  <div id="posts-section" style="display:none; margin-top:28px;">
+    <div class="section-label">📝 Posts</div>
+    <div id="post-write-section" style="display:none;">
+      <div class="post-write-wrap">
+        <textarea class="post-write-input" id="post-input" placeholder="Write something to your channel..."></textarea>
+        <button class="post-write-submit" id="post-submit">Post</button>
+      </div>
+    </div>
+    <div id="posts-list"><div class="empty">No posts yet.</div></div>
+  </div>
+</main>
+<footer><span>&copy; 2025 SomaliTube.</span><span> | </span><span>Contact: <a href="mailto:arneper606@gmail.com">arneper606@gmail.com</a></span></footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  firebase.initializeApp({ apiKey: "AIzaSyDxOI-TwU5Sd7yYm1sfceb1HXGYMAQX3kw", authDomain: "somalitube98.firebaseapp.com", projectId: "somalitube98", storageBucket: "somalitube98.firebasestorage.app", messagingSenderId: "301195499282", appId: "1:301195499282:web:b89255bba0f5ed1eba05cb" });
+  var auth = firebase.auth(); var db = firebase.firestore();
+  var currentUser = null;
+  var profileUid = new URLSearchParams(window.location.search).get('uid');
+
+  auth.onAuthStateChanged(function(user) {
+    currentUser = user;
+    var authArea = document.getElementById('auth-area');
+    var uploadWrap = document.getElementById('upload-btn-wrap');
+    if (user) {
+      var i = (user.displayName||'?')[0].toUpperCase();
+      authArea.innerHTML = '<a href="profile.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#f1f1f1;"><div style="width:38px;height:38px;background:#ff6a00;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;font-family:Bangers,Impact,fantasy;">' + i + '</div><span style="font-size:13px;font-weight:900;">' + (user.displayName||'Profile') + '</span></a>';
+      uploadWrap.innerHTML = '<a href="https://docs.google.com/forms/d/e/1FAIpQLSesVkUCUFMIIiHSAhhaGc3zPu1Fk8IJroeHty4TWqTGf13wog/viewform?usp=header" target="_blank" class="topbar-btn fill">Make de video!</a>';
+    }
+    loadProfile();
+  });
+
+  function loadProfile() {
+    var wrap = document.getElementById('profile-wrap');
+    if (!profileUid) { wrap.innerHTML = '<p style="color:#666;">No user specified.</p>'; return; }
+    db.collection('users').doc(profileUid).get().then(function(doc) {
+      if (!doc.exists) { wrap.innerHTML = '<p style="color:#666;">User not found.</p>'; return; }
+      var data = doc.data();
+      var initial = (data.username||'?')[0].toUpperCase();
+      var bio = data.bio || '';
+      db.collection('users').doc(profileUid).collection('subscribers').get().then(function(subSnap) {
+        var subCount = subSnap.size;
+        var isSubbed = currentUser ? subSnap.docs.some(function(d){ return d.id === currentUser.uid; }) : false;
+        db.collection('users').doc(profileUid).collection('ratings').get().then(function(rSnap) {
+          var likes = 0, dislikes = 0, myVote = null;
+          rSnap.forEach(function(d) {
+            if (d.data().vote === 'like') likes++; else dislikes++;
+            if (currentUser && d.id === currentUser.uid) myVote = d.data().vote;
+          });
+          var total = likes + dislikes;
+          var pct = total > 0 ? Math.round((likes/total)*100) : 0;
+
+          var subBtnHTML = currentUser
+            ? '<button class="sub-btn ' + (isSubbed?'subbed':'') + '" id="sub-btn">' + (isSubbed ? 'Subcreibed! ✅' : 'Subscreib! ➕') + ' · ' + subCount + '</button>'
+            : '<a href="login.html" class="sub-btn">Subscreib! ➕ · ' + subCount + '</a>';
+
+          var ratingHTML = currentUser
+            ? '<div class="rating-row"><button class="rate-btn ' + (myVote==='like'?'liked':'') + '" id="like-btn">👍 ' + likes + '</button><button class="rate-btn ' + (myVote==='dislike'?'disliked':'') + '" id="dislike-btn">👎 ' + dislikes + '</button><div class="rating-bar-bg"><div class="rating-bar-fill" style="width:' + pct + '%"></div></div><span class="rating-pct">' + pct + '% liked</span></div>'
+            : '<div class="rating-row"><a href="login.html" style="font-size:12px;color:#ff6a00;font-weight:900;">Log in to rate this channel</a></div>';
+
+          var bioHTML = bio ? '<div class="bio-display">' + bio + '</div>' : '';
+
+          wrap.innerHTML =
+            '<div class="profile-box">' +
+              '<div class="top-row">' +
+                '<div class="avatar">' + initial + '</div>' +
+                '<div class="info">' +
+                  '<h2>' + (data.username||'Unknown') + '</h2>' +
+                  '<p>' + subCount + ' subscriber' + (subCount !== 1 ? 's' : '') + '</p>' +
+                '</div>' +
+              '</div>' +
+              bioHTML +
+              '<div class="actions">' + subBtnHTML + ratingHTML + '</div>' +
+            '</div>';
+
+          document.getElementById('videos-section').style.display = 'block';
+          document.getElementById('posts-section').style.display = 'block';
+
+          // Show post writer only if viewing your own profile
+          if (currentUser && currentUser.uid === profileUid) {
+            document.getElementById('post-write-section').style.display = 'block';
+          }
+
+          loadPosts();
+
+          var subBtn = document.getElementById('sub-btn');
+          if (subBtn) subBtn.addEventListener('click', function() {
+            if (!currentUser) return;
+            var ref = db.collection('users').doc(profileUid).collection('subscribers').doc(currentUser.uid);
+            if (isSubbed) ref.delete().then(loadProfile); else ref.set({ uid: currentUser.uid }).then(loadProfile);
+          });
+          var likeBtn = document.getElementById('like-btn');
+          if (likeBtn) likeBtn.addEventListener('click', function() {
+            if (!currentUser) return;
+            var ref = db.collection('users').doc(profileUid).collection('ratings').doc(currentUser.uid);
+            if (myVote === 'like') ref.delete().then(loadProfile); else ref.set({ vote: 'like' }).then(loadProfile);
+          });
+          var dislikeBtn = document.getElementById('dislike-btn');
+          if (dislikeBtn) dislikeBtn.addEventListener('click', function() {
+            if (!currentUser) return;
+            var ref = db.collection('users').doc(profileUid).collection('ratings').doc(currentUser.uid);
+            if (myVote === 'dislike') ref.delete().then(loadProfile); else ref.set({ vote: 'dislike' }).then(loadProfile);
+          });
+        });
+      });
+    });
+  }
+
+  // POST SUBMIT
+  document.getElementById('post-submit').addEventListener('click', function() {
+    if (!currentUser || currentUser.uid !== profileUid) return;
+    var text = document.getElementById('post-input').value.trim();
+    if (!text) return;
+    var btn = document.getElementById('post-submit');
+    btn.textContent = 'Posting...'; btn.disabled = true;
+    db.collection('userPosts').doc(profileUid).collection('posts').add({
+      uid: currentUser.uid,
+      username: currentUser.displayName || 'Unknown',
+      text: text,
+      createdAt: new Date().toISOString()
+    }).then(function() {
+      document.getElementById('post-input').value = '';
+      btn.textContent = 'Post'; btn.disabled = false;
+      loadPosts();
+    }).catch(function(err) {
+      btn.textContent = 'Post'; btn.disabled = false;
+      alert('Error: ' + err.message);
+    });
+  });
+
+  function loadPosts() {
+    db.collection('userPosts').doc(profileUid).collection('posts').orderBy('createdAt', 'desc').get().then(function(snap) {
+      var list = document.getElementById('posts-list');
+      if (snap.empty) { list.innerHTML = '<div class="empty">No posts yet.</div>'; return; }
+      list.innerHTML = '';
+      snap.forEach(function(postDoc) {
+        var p = postDoc.data();
+        var pid = postDoc.id;
+        var initial = (p.username||'?')[0].toUpperCase();
+        var date = p.createdAt ? new Date(p.createdAt).toLocaleDateString() : '';
+        var div = document.createElement('div');
+        div.className = 'post-box';
+        div.id = 'post-' + pid;
+        div.innerHTML =
+          '<div class="post-header">' +
+            '<div class="post-avatar">' + initial + '</div>' +
+            '<span class="post-username">' + (p.username||'Unknown') + '</span>' +
+            '<span class="post-time">' + date + '</span>' +
+          '</div>' +
+          '<div class="post-text">' + p.text.replace(/</g,'&lt;') + '</div>' +
+          '<button class="post-comment-toggle" onclick="toggleComments(\'' + pid + '\')">💬 Show comments</button>' +
+          '<div class="post-comments" id="pc-' + pid + '">' +
+            '<div id="pc-list-' + pid + '"><div class="empty" style="font-size:12px;">No comments yet.</div></div>' +
+            (currentUser
+              ? '<div class="post-comment-form"><input class="post-comment-input" id="pc-input-' + pid + '" placeholder="Write a comment..." /><button class="post-comment-submit" onclick="submitPostComment(\'' + pid + '\')">Post</button></div>'
+              : '<p style="font-size:12px;color:#555;margin-top:8px;"><a href="login.html" style="color:#ff6a00;font-weight:900;">Log in</a> to comment.</p>') +
+          '</div>';
+        list.appendChild(div);
+      });
+    });
+  }
+
+  function toggleComments(pid) {
+    var section = document.getElementById('pc-' + pid);
+    var btn = section.previousElementSibling;
+    if (section.style.display === 'block') {
+      section.style.display = 'none';
+      btn.textContent = '💬 Show comments';
+    } else {
+      section.style.display = 'block';
+      btn.textContent = '💬 Hide comments';
+      loadPostComments(pid);
+    }
+  }
+
+  function loadPostComments(pid) {
+    db.collection('userPosts').doc(profileUid).collection('posts').doc(pid).collection('comments').orderBy('createdAt', 'asc').get().then(function(snap) {
+      var list = document.getElementById('pc-list-' + pid);
+      if (!list) return;
+      if (snap.empty) { list.innerHTML = '<div class="empty" style="font-size:12px;">No comments yet.</div>'; return; }
+      list.innerHTML = '';
+      snap.forEach(function(d) {
+        var c = d.data();
+        var initial = (c.username||'?')[0].toUpperCase();
+        list.innerHTML +=
+          '<div class="post-comment">' +
+            '<a href="user.html?uid=' + (c.uid||'') + '" class="pc-avatar">' + initial + '</a>' +
+            '<div class="pc-body">' +
+              '<div class="pc-username">' + (c.username||'Unknown') + '</div>' +
+              '<div class="pc-text">' + c.text.replace(/</g,'&lt;') + '</div>' +
+            '</div>' +
+          '</div>';
+      });
+    });
+  }
+
+  function submitPostComment(pid) {
+    if (!currentUser) return;
+    var input = document.getElementById('pc-input-' + pid);
+    var text = input.value.trim();
+    if (!text) return;
+    db.collection('userPosts').doc(profileUid).collection('posts').doc(pid).collection('comments').add({
+      uid: currentUser.uid,
+      username: currentUser.displayName || 'Unknown',
+      text: text,
+      createdAt: new Date().toISOString()
+    }).then(function() {
+      input.value = '';
+      loadPostComments(pid);
+    }).catch(function(err) {
+      alert('Error: ' + err.message);
+    });
+  }
+</script>
+</body>
+</html>
