@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Upload - SomaliTube</title><link rel="icon" type="image/png" href="logo.png"><link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;color:#f1f1f1;font-family:'Nunito',Verdana,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+#topbar{background:#1a1a1a;border-bottom:4px solid #ff6a00;height:68px;display:flex;align-items:center;padding:0 16px;gap:10px;position:sticky;top:0;z-index:100}
+#logo{font-family:'Bangers',Impact,fantasy;font-size:28px;color:#fff;text-decoration:none;letter-spacing:2px;text-shadow:3px 3px 0 #ff6a00;white-space:nowrap}
+#auth-area{margin-left:auto;display:flex;gap:8px;align-items:center}
+.topbar-btn,.auth-btn,.btn{height:34px;padding:0 14px;font-size:12px;font-weight:900;font-family:'Nunito',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;border:2px solid #ff6a00;white-space:nowrap;background:#ff6a00;color:#fff}
+.outline{background:transparent;color:#ff6a00}.outline:hover{background:#ff6a00;color:#fff}
+.btn:hover{background:#e05a00}.btn:disabled{opacity:.5;cursor:wait}
+.danger{background:transparent;border-color:#ff4444;color:#ff4444}.danger:hover{background:#ff4444;color:#fff}
+main{flex:1;max-width:960px;width:100%;margin:0 auto;padding:24px 16px}
+.section-label{font-family:'Bangers',Impact,fantasy;font-size:22px;color:#ff6a00;letter-spacing:2px;margin-bottom:16px;border-left:5px solid #ff6a00;padding-left:12px}
+.av{display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-family:'Bangers',Impact,fantasy;flex-shrink:0;text-decoration:none;text-shadow:1px 1px 0 rgba(0,0,0,.35)}
+input[type=text],textarea{width:100%;background:#2a2a2a;border:2px solid #333;color:#f1f1f1;font:13px 'Nunito',sans-serif;padding:10px 12px;outline:none}
+input:focus,textarea:focus{border-color:#ff6a00}
+label.f{display:block;font-family:'Bangers',Impact,fantasy;font-size:20px;color:#ff6a00;letter-spacing:1px;margin:16px 0 6px}
+.hint{font-size:11px;color:#777;margin-top:4px}.msg{margin-top:12px;font-size:13px;font-weight:700;color:#ff4444;min-height:18px}.msg.ok{color:#44ff88}
+.bar{height:10px;background:#2a2a2a;border:1px solid #333;margin-top:10px;display:none}.bar div{height:100%;width:0;background:#ff6a00}
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+.video-card{background:#1e1e1e;border:2px solid #2a2a2a;display:flex;flex-direction:column}
+.video-card:hover{border-color:#ff6a00}
+.thumb-wrap{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#2a2a2a}.thumb-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;background:rgba(0,0,0,.4)}.video-card:hover .play-overlay{opacity:1}.play-overlay svg{width:52px;height:52px;fill:#ff6a00}
+.v-info{padding:10px 12px 14px;display:flex;flex-direction:column;gap:5px}
+.v-title{font-size:14px;font-weight:900;color:#f1f1f1;text-decoration:none;line-height:1.35;overflow-wrap:anywhere}.v-title:hover{color:#ff6a00}
+.v-channel a{font-size:12px;color:#ff6a00;text-decoration:none;font-weight:700}.v-meta{font-size:11px;color:#777}
+.v-actions{display:flex;gap:8px;margin-top:8px}.v-actions .btn{height:30px;padding:0 10px}
+/* comments */
+.comment{background:#1e1e1e;border:2px solid #2a2a2a;padding:12px 14px;margin-bottom:10px}.comment:hover{border-color:#ff6a00}
+.comment.reply{margin-left:36px;background:#191919}
+.c-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}.c-head .av{width:34px;height:34px;font-size:14px}
+.c-user{font-size:13px;font-weight:900;color:#ff6a00;text-decoration:none}.c-time{font-size:11px;color:#666;margin-left:auto}
+.c-text{font-size:13px;color:#ccc;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.c-text.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.lk{background:none;border:none;color:#ff6a00;font:900 12px 'Nunito',sans-serif;cursor:pointer;padding:0;margin:6px 12px 0 0}.lk:hover{text-decoration:underline}.lk.d{color:#ff4444}
+.slot textarea{min-height:60px;margin-top:8px;resize:vertical}.slot .btn{height:30px;margin:6px 6px 0 0}
+footer{background:#1a1a1a;border-top:4px solid #ff6a00;padding:14px 20px;text-align:center;font-size:12px;color:#555;margin-top:40px}footer a{color:#ff6a00;text-decoration:none}
+
+.box{background:#1e1e1e;border:3px solid #ff6a00;padding:32px 28px;box-shadow:8px 8px 0 #000}
+h1.big{font-family:'Bangers',Impact,fantasy;font-size:40px;letter-spacing:3px;color:#fff;text-shadow:3px 3px 0 #ff6a00;text-align:center}
+.sub{text-align:center;font-size:12px;color:#888;margin:4px 0 8px}
+.cnt{float:right;font-size:11px;color:#666;font-family:'Nunito',sans-serif}
+.dzs{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:560px){.dzs{grid-template-columns:1fr}}
+.dz{border:3px dashed #444;background:#181818;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px;cursor:pointer;position:relative;overflow:hidden;transition:.15s}
+.dz:hover,.dz.over{border-color:#ff6a00;background:#221a14}.dz.has{border-style:solid;border-color:#ff6a00}
+.dz input{display:none}.dz .ic{font-size:40px}.dz .t{font-family:'Bangers',Impact,fantasy;font-size:20px;letter-spacing:1px;color:#ff6a00;margin-top:6px}
+.dz .s{font-size:11px;color:#777;margin-top:4px;overflow-wrap:anywhere}.dz img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35}
+.dz .in{position:relative;z-index:1}
+.badge{display:inline-block;margin-top:8px;font-size:11px;font-weight:900;padding:3px 8px;background:#2a2a2a;border:1px solid #444}.badge.ok{color:#44ff88;border-color:#44ff88}.badge.sq{color:#ffcc00;border-color:#ffcc00}
+.steps{list-style:none;margin:18px 0;text-align:left}.steps li{padding:8px 10px;margin-bottom:6px;background:#181818;border-left:4px solid #333;font-size:13px;font-weight:900;color:#666}
+.steps li.run{border-color:#ff6a00;color:#fff}.steps li.done{border-color:#44ff88;color:#44ff88}
+.pbar{height:30px;background:#2a2a2a;border:2px solid #333;position:relative}.pfill{height:100%;width:0;background:repeating-linear-gradient(45deg,#ff6a00,#ff6a00 12px,#ff8c3a 12px,#ff8c3a 24px);transition:width .2s}
+.ppct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;text-shadow:1px 1px 0 #000}
+.warn{margin-top:16px;padding:12px;border:2px solid #ff4444;color:#ff4444;font-weight:900;font-size:13px;background:rgba(255,68,68,.08)}</style></head><body>
+<div id="topbar"><a href="index.html" id="logo">SOMALITUBE!!!!</a><a href="channels.html" class="topbar-btn outline" style="margin-left:auto">Everi chanal</a><div id="upload-btn-wrap"></div><div id="auth-area"><a href="login.html" class="auth-btn outline">Log In</a><a href="signup.html" class="auth-btn">Sign Up</a></div></div><main style="max-width:640px">
+<div id="form-panel" class="box"><h1 class="big">MAKE DE VIDEO</h1><div class="sub">YOUTUBE BUT KEEGER. Your vid goes live right away.</div>
+<label class="f">Title <span class="cnt" id="tc">0/100</span></label><input type="text" id="title" maxlength="100" placeholder="Name of de video">
+<label class="f">Description <span class="cnt" id="dc">0/2000</span></label><textarea id="desc" maxlength="2000" style="min-height:100px;resize:vertical" placeholder="Tell de keegs what it is"></textarea>
+<div class="dzs" style="margin-top:18px">
+<label class="dz" id="vz"><input type="file" id="vid" accept="video/*"><div class="in"><div class="ic">&#127916;</div><div class="t">VIDEO</div><div class="s" id="vs">Click or drag a video here<br>(max 1 hour, auto squished to 10MB)</div><div id="vb"></div></div></label>
+<label class="dz" id="tz"><input type="file" id="thumb" accept="image/*"><img id="tp" alt="" style="display:none"><div class="in"><div class="ic">&#128444;</div><div class="t">THUMBNAIL</div><div class="s" id="ts">Click or drag an image here<br>(auto shrunk to 2MB)</div><div id="tb"></div></div></label></div>
+<div class="msg" id="msg"></div>
+<button class="btn" id="go" style="height:50px;width:100%;font-size:22px;font-family:'Bangers',Impact,fantasy;letter-spacing:3px;margin-top:10px">POST IT!</button></div>
+<div id="prog-panel" class="box" style="display:none;text-align:center"><h1 class="big">UPLOADIN...</h1>
+<ul class="steps"><li id="s1">&#9675; Shrink thumbnail</li><li id="s2">&#9675; Prep / squish video</li><li id="s3">&#9675; Upload files</li><li id="s4">&#9675; Post it</li></ul>
+<div class="pbar"><div class="pfill" id="pfill"></div><div class="ppct" id="ppct">0%</div></div>
+<div class="warn">&#9888;&#65039; DONT CLOSE OR REFRESH THIS TAB! Wait til it says its done.</div><div class="msg" id="err"></div></div>
+<div id="done-panel" class="box" style="display:none;text-align:center;padding:40px 24px"><div style="font-size:56px">&#127881;</div><h1 class="big" style="font-size:44px;line-height:1.15;margin-top:8px">BOOM, your vid is fuckin' OUT!</h1>
+<a id="watch-now" href="#" class="btn" style="height:52px;width:100%;justify-content:center;font-size:24px;font-family:'Bangers',Impact,fantasy;letter-spacing:3px;margin-top:26px">WATCH NOW</a></div></main><footer>&copy; 2026 SomaliTube. | Contact: <a href="mailto:arneper606@gmail.com">arneper606@gmail.com</a></footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script><script src="st.js"></script><script>
+var user=null,busy=false,vf=null,tf=null,$=function(i){return document.getElementById(i)};
+auth.onAuthStateChanged(function(u){if(!u)return location.href='login.html';user=u;stNav(u)});
+window.addEventListener('beforeunload',function(e){if(busy){e.preventDefault();e.returnValue=''}});
+function say(t){$('msg').textContent=t}
+function mb(b){return (b/1048576).toFixed(1)+'MB'}
+$('title').oninput=function(){$('tc').textContent=this.value.length+'/100'};$('desc').oninput=function(){$('dc').textContent=this.value.length+'/2000'};
+function wire(zone,inp,kind){
+  var z=$(zone),i=$(inp);
+  ['dragenter','dragover'].forEach(function(e){z.addEventListener(e,function(ev){ev.preventDefault();z.classList.add('over')})});
+  ['dragleave','drop'].forEach(function(e){z.addEventListener(e,function(ev){ev.preventDefault();z.classList.remove('over')})});
+  z.addEventListener('drop',function(ev){if(ev.dataTransfer.files.length){i.files=ev.dataTransfer.files;i.dispatchEvent(new Event('change'))}});
+  i.onchange=function(){var f=i.files[0];if(!f)return;
+    if(kind==='v'){if(!/^video\//.test(f.type))return say('That aint a video!');say('');vf=f;z.classList.add('has');
+      $('vs').innerHTML=esc(f.name)+' &middot; '+mb(f.size);$('vb').innerHTML=f.size>MAX_VID?'<span class="badge sq">Will be squished to 10MB</span>':'<span class="badge ok">Under 10MB &#10003; no squish</span>';
+      var p=document.createElement('video');p.preload='metadata';p.onloadedmetadata=function(){var m=Math.ceil(p.duration/60);if(p.duration>MAX_SECONDS)say('Video is over 1 hour, too long!');else if(f.size>MAX_VID)$('vb').innerHTML+='<br><span class="badge sq">Takes ~'+m+' min to squish'+(m>10?' &middot; long vid = worse quality':'')+'</span>';URL.revokeObjectURL(p.src)};p.src=URL.createObjectURL(f)}
+    else{if(!/^image\//.test(f.type))return say('That aint an image!');say('');tf=f;z.classList.add('has');var im=$('tp');im.src=URL.createObjectURL(f);im.style.display='block';
+      $('ts').innerHTML=esc(f.name)+' &middot; '+mb(f.size);$('tb').innerHTML=f.size>MAX_THUMB?'<span class="badge sq">Will be shrunk to 2MB</span>':'<span class="badge ok">Under 2MB &#10003;</span>'}}}
+wire('vz','vid','v');wire('tz','thumb','t');
+function setP(p){p=Math.max(0,Math.min(1,p));$('pfill').style.width=Math.round(p*100)+'%';$('ppct').textContent=Math.round(p*100)+'%'}
+function step(n){for(var k=1;k<=4;k++){var e=$('s'+k),t=e.innerHTML.replace(/^.\s*/,'');e.className=k<n?'done':k===n?'run':'';e.innerHTML=(k<n?'&#10003; ':k===n?'&#9654; ':'&#9675; ')+t}}
+$('go').onclick=async function(){
+  var title=$('title').value.trim(),desc=$('desc').value.trim();
+  if(!user)return;if(!title)return say('Add a title!');if(!vf)return say('Pick a video file!');if(!tf)return say('Pick a thumbnail image!');
+  say('');busy=true;$('form-panel').style.display='none';$('prog-panel').style.display='block';
+  try{
+    var id=db.collection('videos').doc().id,base=user.uid+'/'+id,squish=vf.size>MAX_VID,vEnd=squish?0.55:0.08;
+    step(1);setP(0.02);var t=await stCompressThumb(tf);
+    step(2);setP(0.05);if(squish)$('s2').innerHTML='&#9654; Squishin video to 10MB (takes about as long as de video)';
+    var v=await stCompressVideo(vf,function(p){setP(0.05+p*(vEnd-0.05))});
+    var vp=base+'/video.'+(v.name.split('.').pop()),tp=base+'/thumb.jpg';
+    step(3);setP(vEnd);var thumbURL=await stUpload(t,tp);
+    var videoURL=await stUpload(v,vp,function(p){setP(vEnd+0.03+p*(0.96-vEnd-0.03))});
+    step(4);setP(0.98);
+    await db.collection('videos').doc(id).set({uid:user.uid,username:user.displayName||'Unknown',title:title,description:desc,videoURL:videoURL,thumbURL:thumbURL,videoPath:vp,thumbPath:tp,createdAt:new Date().toISOString()});
+    setP(1);busy=false;$('watch-now').href='watch.html?v='+id;$('prog-panel').style.display='none';$('done-panel').style.display='block';
+  }catch(e){busy=false;$('err').textContent=e.message+' (refresh to try again)'}
+};
+</script></body></html>
