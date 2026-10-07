@@ -3,7 +3,7 @@ firebase.initializeApp({apiKey:"AIzaSyDxOI-TwU5Sd7yYm1sfceb1HXGYMAQX3kw",authDom
 var auth=firebase.auth(),db=firebase.firestore();
 
 /* ====== SUPABASE STORAGE: PUT YOUR OWN VALUES HERE ====== */
-var SUPA_URL='https://YOUR-PROJECT.supabase.co', SUPA_KEY='YOUR-ANON-PUBLIC-KEY', BUCKET='media';
+var SUPA_URL='https://sxbpxbcnkyevqdsvxkfh.supabase.co', SUPA_KEY='sb_publishable_ROnce5mBf89rXOpJzbDEBQ_wPdObJWC', BUCKET='media';
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 /* Random-looking but permanent vibrant colour per user: full hue range, 90% saturation, 52% lightness => never black/white/dull */
