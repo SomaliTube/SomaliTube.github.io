@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Everi Chanal - SomaliTube</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; color: #f1f1f1; font-family: 'Nunito', Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    a { color: inherit; text-decoration: none; }
+    #topbar { background: #1a1a1a; border-bottom: 4px solid #ff6a00; min-height: 68px; display: flex; flex-wrap: wrap; align-items: center; padding: 8px 16px; gap: 10px; position: sticky; top: 0; z-index: 100; }
+    #logo { font-family: 'Bangers', Impact, fantasy; font-size: 28px; color: #fff; letter-spacing: 2px; text-shadow: 3px 3px 0px #ff6a00; white-space: nowrap; }
+    .topbar-btn { height: 34px; padding: 0 14px; font-size: 12px; font-weight: 900; display: inline-flex; align-items: center; border: 2px solid #ff6a00; white-space: nowrap; background: #ff6a00; color: #fff; }
+    .topbar-btn.outline { background: transparent; color: #ff6a00; }
+    .topbar-btn.outline:hover { background: #ff6a00; color: #fff; }
+    #auth-area { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .auth-btn { height: 36px; padding: 0 20px; font-size: 13px; font-weight: 900; display: inline-flex; align-items: center; border: 2px solid #ff6a00; background: #ff6a00; color: #fff; }
+    #btn-login { background: transparent; color: #ff6a00; }
+    main { flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 28px 16px; display: flex; flex-direction: column; gap: 20px; }
+    .section-label { font-family: 'Bangers', Impact, fantasy; font-size: 22px; color: #ff6a00; letter-spacing: 2px; border-left: 5px solid #ff6a00; padding-left: 12px; line-height: 1.1; }
+    .hint { font-size: 13px; color: #aaa; margin: 8px 0 0 17px; }
+    .row { display: flex; flex-wrap: wrap; gap: 18px; align-items: stretch; }
+    .row.small { gap: 14px; }
+    .cc { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: #1e1e1e; border: 2px solid #ff6a00; padding: 34px 16px 18px; min-width: 0; }
+    .cc:hover { border-color: #ffb27a; }
+    .cc.big { flex: 1 1 260px; }
+    .cc.sm { flex: 1 1 180px; padding: 30px 14px 16px; border-color: #2a2a2a; }
+    .cc.sm:hover { border-color: #ff6a00; }
+    .rank { position: absolute; left: -2px; top: -2px; background: #ff6a00; color: #111; font-family: 'Bangers', Impact, fantasy; font-size: 26px; line-height: 1.1; padding: 2px 12px; }
+    .cc.sm .rank { font-size: 20px; }
+    .tag { position: absolute; right: 10px; top: 10px; font-family: 'Bangers', Impact, fantasy; font-size: 14px; letter-spacing: 1px; color: #ff6a00; }
+    .cname { display: flex; align-items: center; justify-content: center; gap: 5px; max-width: 100%; font-size: 15px; font-weight: 900; margin-top: 12px; }
+    .cname span.t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .num { margin-top: 12px; font-family: 'Bangers', Impact, fantasy; font-size: 48px; line-height: 1; color: #ff6a00; }
+    .cc.sm .num { font-size: 32px; }
+    .lbl { font-size: 11px; font-weight: 900; letter-spacing: 2px; color: #aaa; margin-top: 2px; }
+    .barw { width: 100%; height: 6px; background: #111; border: 1px solid #2a2a2a; margin-top: 12px; }
+    .barw div { height: 100%; background: #ff6a00; }
+    .subbtn { margin-top: 14px; height: 34px; padding: 0 20px; font: 900 13px 'Nunito', sans-serif; cursor: pointer; border: 2px solid #ff6a00; background: #ff6a00; color: #fff; }
+    .subbtn:hover { background: #e05a00; }
+    .subbtn.on { background: transparent; color: #ff6a00; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+    .old { display: flex; flex-direction: column; align-items: center; text-align: center; background: #1e1e1e; border: 2px solid #2a2a2a; padding: 20px 16px; min-width: 0; }
+    .old:hover { border-color: #ff6a00; }
+    .old .n { display: flex; align-items: center; justify-content: center; gap: 5px; max-width: 100%; font-size: 14px; font-weight: 900; margin-top: 10px; }
+    .old .n span.t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .old .s { font-size: 13px; font-weight: 900; color: #ff6a00; margin-top: 4px; }
+    .loading { font-size: 13px; color: #666; }
+    footer { background: #1a1a1a; border-top: 4px solid #ff6a00; padding: 14px 20px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+<div id="topbar">
+  <a href="index.html" id="logo">SOMALITUBE!!!!</a>
+  <a href="channels.html" class="topbar-btn outline" style="margin-left:auto">All chanals..</a>
+  <div id="upload-btn-wrap"></div>
+  <div id="auth-area"><a href="login.html" class="auth-btn" id="btn-login">Log In</a><a href="signup.html" class="auth-btn">Sign Up</a></div>
+</div>
+<main>
+  <div>
+    <div class="section-label">Most Populer Somalitubers:</div>
+    <div class="hint">Who got de most subs? Hit subscribe on ur favorites. Top 3 get a number badge next to their name.</div>
+  </div>
+  <div id="area"><div class="loading">Loading channels...</div></div>
+</main>
+<footer>&copy; 1972 SomaliTube. No rights reserved. <span style="margin:0 8px;">|</span> Version 1.0</footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="st.js"></script>
+<script>
+  var $ = function(i) { return document.getElementById(i); };
+  var cu = null, M = {}, ids = [], ready = false;
+  var TAGS = ['DE BOSS', 'RUNNER UP', 'ALMOST'];
+  auth.onAuthStateChanged(function(u) { cu = u; stNav(u); paintSubs(); });
+
+  function subs(n) { return n + ' subscriber' + (n !== 1 ? 's' : ''); }
+  function big(id, i, max) {
+    var c = M[id], tag = i < 3 ? '<div class="tag">' + TAGS[i] + '</div>' : '';
+    return '<div class="cc ' + (i < 3 ? 'big' : 'sm') + '"><div class="rank">#' + (i + 1) + '</div>' + tag +
+      '<a href="user.html?uid=' + id + '">' + stAv(c.name, id, i < 3 ? 96 : 64) + '</a>' +
+      '<a href="user.html?uid=' + id + '" class="cname"><span class="t">' + esc(c.name) + '</span>' + stSlot(id) + '</a>' +
+      '<div class="num" id="n-' + id + '">' + c.subs + '</div><div class="lbl">SUBSCRIBERS</div>' +
+      '<div class="barw"><div style="width:' + Math.max(2, Math.round(c.subs / max * 100)) + '%"></div></div>' +
+      '<button class="subbtn" data-uid="' + id + '">Subscreib!</button></div>';
+  }
+  stBadges(true).then(function(m) {
+    M = m; ids = Object.keys(m);
+    if (!ids.length) { $('area').innerHTML = '<div class="loading">No channels yet. Be the first! 👀</div>'; return; }
+    ids.sort(function(a, b) { return (m[b].subs - m[a].subs) || (m[a].t - m[b].t); });
+    var max = Math.max(1, m[ids[0]].subs), h = '';
+    h += '<div class="row">' + ids.slice(0, 3).map(function(id, i) { return big(id, i, max); }).join('') + '</div>';
+    if (ids.length > 3) h += '<div class="row small" style="margin-top:18px">' + ids.slice(3, 8).map(function(id, i) { return big(id, i + 3, max); }).join('') + '</div>';
+    if (ids.length > 8) {
+      h += '<div class="section-label" style="font-size:18px;margin:28px 0 14px">Everi other chanal</div><div class="grid">' +
+        ids.slice(8).map(function(id) { var c = m[id];
+          return '<a href="user.html?uid=' + id + '" class="old">' + stAv(c.name, id, 70) + '<div class="n"><span class="t">' + esc(c.name) + '</span>' + stSlot(id) + '</div><div class="s">' + subs(c.subs) + '</div></a>'; }).join('') + '</div>';
+    }
+    $('area').innerHTML = h; ready = true; paintSubs();
+  });
+
+  /* subscribe buttons (top 8) */
+  var mine = {};
+  function paintSubs() {
+    if (!ready) return;
+    var btns = document.querySelectorAll('.subbtn');
+    if (!cu) { btns.forEach(function(b) { b.textContent = 'Subscreib!'; b.className = 'subbtn'; }); return; }
+    btns.forEach(function(b) {
+      var uid = b.dataset.uid;
+      db.collection('users').doc(uid).collection('subscribers').doc(cu.uid).get().then(function(d) { mine[uid] = d.exists; draw(b); });
+    });
+  }
+  function draw(b) { var on = mine[b.dataset.uid]; b.textContent = on ? 'Subcreibed!' : 'Subscreib!'; b.className = 'subbtn' + (on ? ' on' : ''); }
+  document.addEventListener('click', function(e) {
+    var b = e.target.closest('.subbtn'); if (!b) return;
+    if (!cu) return location.href = 'login.html';
+    var uid = b.dataset.uid, ref = db.collection('users').doc(uid).collection('subscribers').doc(cu.uid), was = !!mine[uid];
+    b.disabled = true;
+    (was ? ref.delete() : ref.set({ uid: cu.uid })).then(function() {
+      mine[uid] = !was; M[uid].subs += was ? -1 : 1; $('n-' + uid).textContent = M[uid].subs; b.disabled = false; draw(b);
+      try { sessionStorage.removeItem('stb2'); } catch (x) {}
+    }).catch(function(err) { b.disabled = false; alert(err.message); });
+  });
+</script>
+</body>
+</html>

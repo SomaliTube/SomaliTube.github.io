@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Dashboard - SomaliTube</title><link rel="icon" type="image/png" href="logo.png"><link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;color:#f1f1f1;font-family:'Nunito',Verdana,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+#topbar{background:#1a1a1a;border-bottom:4px solid #ff6a00;height:68px;display:flex;align-items:center;padding:0 16px;gap:10px;position:sticky;top:0;z-index:100}
+#logo{font-family:'Bangers',Impact,fantasy;font-size:28px;color:#fff;text-decoration:none;letter-spacing:2px;text-shadow:3px 3px 0 #ff6a00;white-space:nowrap}
+#auth-area{margin-left:auto;display:flex;gap:8px;align-items:center}
+.topbar-btn,.auth-btn,.btn{height:34px;padding:0 14px;font-size:12px;font-weight:900;font-family:'Nunito',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;border:2px solid #ff6a00;white-space:nowrap;background:#ff6a00;color:#fff}
+.outline{background:transparent;color:#ff6a00}.outline:hover{background:#ff6a00;color:#fff}
+.btn:hover{background:#e05a00}.btn:disabled{opacity:.5;cursor:wait}
+.danger{background:transparent;border-color:#ff4444;color:#ff4444}.danger:hover{background:#ff4444;color:#fff}
+main{flex:1;max-width:960px;width:100%;margin:0 auto;padding:24px 16px}
+.section-label{font-family:'Bangers',Impact,fantasy;font-size:22px;color:#ff6a00;letter-spacing:2px;margin-bottom:16px;border-left:5px solid #ff6a00;padding-left:12px}
+.av{display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-family:'Bangers',Impact,fantasy;flex-shrink:0;text-decoration:none;text-shadow:1px 1px 0 rgba(0,0,0,.35)}
+input[type=text],textarea{width:100%;background:#2a2a2a;border:2px solid #333;color:#f1f1f1;font:13px 'Nunito',sans-serif;padding:10px 12px;outline:none}
+input:focus,textarea:focus{border-color:#ff6a00}
+label.f{display:block;font-family:'Bangers',Impact,fantasy;font-size:20px;color:#ff6a00;letter-spacing:1px;margin:16px 0 6px}
+.hint{font-size:11px;color:#777;margin-top:4px}.msg{margin-top:12px;font-size:13px;font-weight:700;color:#ff4444;min-height:18px}.msg.ok{color:#44ff88}
+.bar{height:10px;background:#2a2a2a;border:1px solid #333;margin-top:10px;display:none}.bar div{height:100%;width:0;background:#ff6a00}
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+.video-card{background:#1e1e1e;border:2px solid #2a2a2a;display:flex;flex-direction:column}
+.video-card:hover{border-color:#ff6a00}
+.thumb-wrap{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#2a2a2a}.thumb-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;background:rgba(0,0,0,.4)}.video-card:hover .play-overlay{opacity:1}.play-overlay svg{width:52px;height:52px;fill:#ff6a00}
+.v-info{padding:10px 12px 14px;display:flex;flex-direction:column;gap:5px}
+.v-title{font-size:14px;font-weight:900;color:#f1f1f1;text-decoration:none;line-height:1.35;overflow-wrap:anywhere}.v-title:hover{color:#ff6a00}
+.v-channel a{font-size:12px;color:#ff6a00;text-decoration:none;font-weight:700}.v-meta{font-size:11px;color:#777}
+.v-actions{display:flex;gap:8px;margin-top:8px}.v-actions .btn{height:30px;padding:0 10px}
+/* comments */
+.comment{background:#1e1e1e;border:2px solid #2a2a2a;padding:12px 14px;margin-bottom:10px}.comment:hover{border-color:#ff6a00}
+.comment.reply{margin-left:36px;background:#191919}
+.c-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}.c-head .av{width:34px;height:34px;font-size:14px}
+.c-user{font-size:13px;font-weight:900;color:#ff6a00;text-decoration:none}.c-time{font-size:11px;color:#666;margin-left:auto}
+.c-text{font-size:13px;color:#ccc;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.c-text.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.lk{background:none;border:none;color:#ff6a00;font:900 12px 'Nunito',sans-serif;cursor:pointer;padding:0;margin:6px 12px 0 0}.lk:hover{text-decoration:underline}.lk.d{color:#ff4444}
+.slot textarea{min-height:60px;margin-top:8px;resize:vertical}.slot .btn{height:30px;margin:6px 6px 0 0}
+footer{background:#1a1a1a;border-top:4px solid #ff6a00;padding:14px 20px;text-align:center;font-size:12px;color:#555;margin-top:40px}footer a{color:#ff6a00;text-decoration:none}
+
+body{background:#0b0b0b;background-image:linear-gradient(rgba(255,106,0,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,106,0,.06) 1px,transparent 1px);background-size:32px 32px;font-family:'Share Tech Mono',monospace}
+.term{color:#44ff88;font-size:15px;margin-bottom:6px}.term b{color:#ff6a00}.cur{display:inline-block;width:9px;height:16px;background:#44ff88;vertical-align:middle;animation:bl 1s steps(1) infinite}@keyframes bl{50%{opacity:0}}
+.dash-title{font-family:'Bangers',Impact,fantasy;font-size:38px;letter-spacing:3px;color:#fff;text-shadow:3px 3px 0 #ff6a00;margin-bottom:22px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:30px}
+.stat{background:#141414;border:2px solid #ff6a00;padding:16px 18px;position:relative;box-shadow:5px 5px 0 #000}
+.stat:before{content:'[ ';position:absolute;top:6px;left:8px;color:#ff6a00;font-size:12px}.stat:after{content:' ]';position:absolute;top:6px;right:8px;color:#ff6a00;font-size:12px}
+.stat .l{font-size:12px;color:#888;letter-spacing:2px;margin-top:8px}.stat .n{font-size:44px;color:#ff6a00;text-shadow:0 0 14px rgba(255,106,0,.55);line-height:1.1;margin-top:10px;overflow-wrap:anywhere}
+.stat .n.sm{font-size:20px;color:#44ff88;text-shadow:0 0 12px rgba(68,255,136,.4);padding-top:12px}
+.row{display:grid;grid-template-columns:170px 1fr auto;gap:16px;align-items:center;background:#141414;border:2px solid #2a2a2a;padding:12px;margin-bottom:12px;transition:.15s}
+.row:hover{border-color:#ff6a00;box-shadow:0 0 18px rgba(255,106,0,.25)}
+.row img{width:170px;aspect-ratio:16/9;object-fit:cover;display:block;background:#222}
+.rt{font-size:17px;color:#fff;font-weight:700;overflow-wrap:anywhere}.rt a{color:#fff;text-decoration:none}.rt a:hover{color:#ff6a00}
+.rm{font-size:12px;color:#777;margin-top:6px}.rm .lk2{color:#ff6a00}.rm .dl{color:#888}
+.rt input{font-family:'Share Tech Mono',monospace;font-size:15px}
+.rb{display:flex;flex-direction:column;gap:6px}.rb .btn{height:30px;font-family:'Share Tech Mono',monospace;justify-content:center}
+.empty{color:#888;padding:30px;border:2px dashed #333;text-align:center}.empty a{color:#ff6a00}
+@media(max-width:640px){.row{grid-template-columns:1fr}.row img{width:100%}.rb{flex-direction:row}}</style></head><body>
+<div id="topbar"><a href="index.html" id="logo">SOMALITUBE!!!!</a><a href="channels.html" class="topbar-btn outline" style="margin-left:auto">Everi chanal</a><div id="upload-btn-wrap"></div><div id="auth-area"><a href="login.html" class="auth-btn outline">Log In</a><a href="signup.html" class="auth-btn">Sign Up</a></div></div><main style="max-width:980px">
+<div class="term"><b>user@somalitube</b>:~$ ./dashboard --stats<span class="cur"></span></div>
+<div class="dash-title">MY CHANAL HQ</div>
+<div class="stats">
+<div class="stat"><div class="n" id="s-subs">--</div><div class="l">SUBSCRIBERS</div></div>
+<div class="stat"><div class="n" id="s-likes">--</div><div class="l">TOTAL LIKES</div></div>
+<div class="stat"><div class="n" id="s-vids">--</div><div class="l">VIDEOS</div></div>
+<div class="stat"><div class="n sm" id="s-top">--</div><div class="l">TOP VID</div></div></div>
+<div class="term" style="margin-bottom:14px"><b>&gt;</b> ls ./my_videos<span id="cnt"></span></div>
+<div id="list"><div class="empty">loading...</div></div></main><footer>&copy; 2026 SomaliTube. | Contact: <a href="mailto:arneper606@gmail.com">arneper606@gmail.com</a></footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script><script src="st.js"></script><script>
+var me=null,vids={};
+auth.onAuthStateChanged(function(u){if(!u)return location.href='login.html';me=u;stNav(u);load()});
+function count(el,to){var n=0,st=Math.max(1,Math.ceil(to/30));if(!to){el.textContent=0;return}var t=setInterval(function(){n=Math.min(to,n+st);el.textContent=n;if(n>=to)clearInterval(t)},25)}
+function load(){
+  db.collection('users').doc(me.uid).collection('subscribers').get().then(function(s){count($('s-subs'),s.size)});
+  db.collection('videos').where('uid','==',me.uid).get().then(function(s){
+    var l=$('list'),a=[];s.forEach(function(d){a.push({id:d.id,v:d.data()});vids[d.id]=d.data()});
+    $('s-vids').textContent=a.length;$('cnt').textContent=' ('+a.length+' files)';
+    if(!a.length){$('s-likes').textContent=0;$('s-top').textContent='none yet';l.innerHTML='<div class="empty">no videos found. <a href="upload.html">upload your first one &rarr;</a></div>';return}
+    a.sort(function(x,y){return y.v.createdAt<x.v.createdAt?-1:1});
+    return Promise.all(a.map(function(x){return db.collection('videoLikes').doc(x.id).collection('likes').get().then(function(q){x.l=0;x.d=0;q.forEach(function(z){z.data().vote==='like'?x.l++:x.d++})})})).then(function(){
+      var tot=0,top=a[0];a.forEach(function(x){tot+=x.l;if(x.l>top.l)top=x});
+      count($('s-likes'),tot);$('s-top').textContent=top.l?top.v.title.slice(0,28)+(top.v.title.length>28?'...':''):'no likes yet';
+      l.innerHTML=a.map(function(x){return '<div class="row" id="r-'+x.id+'"><a href="watch.html?v='+x.id+'"><img src="'+esc(x.v.thumbURL)+'" alt=""></a><div><div class="rt" id="t-'+x.id+'"><a href="watch.html?v='+x.id+'">'+esc(x.v.title)+'</a></div><div class="rm"><span class="lk2">&#128077; '+x.l+'</span> &middot; <span class="dl">&#128078; '+x.d+'</span> &middot; '+stDate(x.v.createdAt)+'</div></div><div class="rb" id="b-'+x.id+'"><button class="btn outline" onclick="edit(\''+x.id+'\')">EDIT TITLE</button><button class="btn danger" onclick="del(\''+x.id+'\')">DELETE</button></div></div>'}).join('')})})}
+function edit(id){
+  $('t-'+id).innerHTML='<input type="text" id="i-'+id+'" maxlength="100">';$('i-'+id).value=vids[id].title;$('i-'+id).focus();
+  $('b-'+id).innerHTML='<button class="btn" onclick="save(\''+id+'\')">SAVE</button><button class="btn outline" onclick="load()">CANCEL</button>'}
+function save(id){var t=$('i-'+id).value.trim().slice(0,100);if(!t)return;db.collection('videos').doc(id).update({title:t}).then(load)}
+async function del(id){if(!confirm('rm -rf "'+vids[id].title+'" ?  This cant be undone.'))return;var v=vids[id];
+  await stRemoveFile(v.videoPath);await stRemoveFile(v.thumbPath);await db.collection('videos').doc(id).delete();load()}
+var $=function(i){return document.getElementById(i)};
+</script></body></html>
