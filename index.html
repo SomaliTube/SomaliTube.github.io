@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SomaliTube</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; color: #f1f1f1; font-family: 'Nunito', Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    a { color: inherit; text-decoration: none; }
+    #topbar { background: #1a1a1a; border-bottom: 4px solid #ff6a00; min-height: 68px; display: flex; flex-wrap: wrap; align-items: center; padding: 8px 16px; gap: 10px; position: sticky; top: 0; z-index: 100; }
+    #logo { font-family: 'Bangers', Impact, fantasy; font-size: 28px; color: #fff; letter-spacing: 2px; text-shadow: 3px 3px 0px #ff6a00; white-space: nowrap; }
+    #search-wrap { display: flex; flex: 1 1 240px; max-width: 420px; margin: 0 auto; }
+    #search-input { flex: 1; min-width: 0; height: 36px; background: #2a2a2a; border: 2px solid #333; border-right: none; color: #fff; font-size: 13px; font-family: 'Nunito', sans-serif; padding: 0 12px; outline: none; }
+    #search-input::placeholder { color: #666; }
+    #search-input:focus { border-color: #ff6a00; }
+    #search-btn { height: 36px; padding: 0 16px; background: #ff6a00; border: 2px solid #ff6a00; color: #fff; font-size: 12px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; letter-spacing: 1px; }
+    #search-btn:hover { background: #e05a00; }
+    .topbar-btn { height: 34px; padding: 0 14px; font-size: 12px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; display: inline-flex; align-items: center; border: 2px solid #ff6a00; white-space: nowrap; }
+    .topbar-btn.outline { background: transparent; color: #ff6a00; }
+    .topbar-btn.outline:hover { background: #ff6a00; color: #fff; }
+    .topbar-btn.fill { background: #ff6a00; color: #fff; }
+    .topbar-btn.fill:hover { background: #e05a00; }
+    #auth-area { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .auth-btn { height: 36px; padding: 0 20px; font-size: 13px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; display: inline-flex; align-items: center; border: 2px solid #ff6a00; }
+    #btn-login { background: transparent; color: #ff6a00; }
+    #btn-login:hover { background: #ff6a00; color: #fff; }
+    #btn-signup { background: #ff6a00; color: #fff; }
+    main { flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 28px 16px; display: flex; flex-direction: column; gap: 28px; }
+    .section-label { font-family: 'Bangers', Impact, fantasy; font-size: 22px; color: #ff6a00; letter-spacing: 2px; border-left: 5px solid #ff6a00; padding-left: 12px; line-height: 1.1; }
+    #hero-row { display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch; }
+    #feat { flex: 1.3 1 340px; min-width: 0; max-width: 480px; display: flex; flex-direction: column; gap: 12px; }
+    #feat-thumb { display: block; position: relative; aspect-ratio: 16/9; background: #2a1608; border: 2px solid #ff6a00; overflow: hidden; }
+    #feat-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    #feat-thumb svg { position: absolute; left: 50%; top: 50%; margin: -24px 0 0 -24px; width: 48px; height: 48px; fill: #ff6a00; filter: drop-shadow(0 0 4px #000); }
+    #feat-title { font-family: 'Bangers', Impact, fantasy; font-size: 22px; letter-spacing: 1px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+    #feat-meta { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #666; }
+    #feat-meta a { color: #ff6a00; }
+    #questbox { flex: 1 1 280px; min-width: 0; background: #ff6a00; padding: 16px; display: flex; flex-direction: column; gap: 10px; color: #111; }
+    #questbox h3 { font-family: 'Bangers', Impact, fantasy; font-size: 26px; letter-spacing: 2px; line-height: 1.1; font-weight: normal; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    #questbox h3 small { font: 900 12px 'Nunito', sans-serif; letter-spacing: 0; }
+    .q { display: flex; align-items: center; gap: 10px; background: #1a1a1a; color: #f1f1f1; padding: 9px 10px; border-left: 5px solid #111; }
+    .q.done { border-left-color: #2fd16f; }
+    .q.got { opacity: .55; }
+    .q .qi { font-size: 20px; width: 26px; text-align: center; flex-shrink: 0; }
+    .q .qt { flex: 1; min-width: 0; font-size: 13px; font-weight: 900; line-height: 1.3; overflow-wrap: anywhere; }
+    .q .qr { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 900; color: #ffb066; white-space: nowrap; }
+    .q .qr img { width: 16px; height: 16px; object-fit: contain; }
+    .q .qs { width: 74px; text-align: center; font-size: 11px; font-weight: 900; color: #888; flex-shrink: 0; }
+    .q button.qs { height: 30px; background: #2fd16f; border: none; color: #111; font: 900 12px 'Nunito', sans-serif; cursor: pointer; animation: qpulse 1.6s infinite; }
+    .q button.qs:hover { background: #55e88e; }
+    .q.got .qs { color: #2fd16f; }
+    @keyframes qpulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(47,209,111,.7); } 50% { box-shadow: 0 0 0 5px rgba(47,209,111,0); } }
+    #questbox .qfoot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 12px; font-weight: 900; }
+    #questbox .qbal { display: inline-flex; align-items: center; gap: 6px; background: #111; color: #fff; padding: 5px 10px; border: 0; font: 900 13px 'Nunito', sans-serif; cursor: pointer; }
+    #questbox .qbal:hover { background: #2a2a2a; }
+    #questbox .qbal img { width: 18px; height: 18px; object-fit: contain; }
+    #questbox .qlogin { display: inline-flex; align-items: center; align-self: flex-start; height: 34px; padding: 0 16px; background: #111; color: #fff; font-weight: 900; font-size: 13px; }
+    #questbox .qnote { font-size: 13px; font-weight: 800; line-height: 1.4; }
+    #top3 { flex: 1 1 260px; min-width: 0; background: #1e1e1e; border: 2px solid #2a2a2a; padding: 14px; display: flex; flex-direction: column; }
+    #top3 .section-label { margin-bottom: 10px; }
+    .lrow { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid #2a2a2a; }
+    .lrow .rk { width: 20px; font-family: 'Bangers', Impact, fantasy; font-size: 20px; color: #666; text-align: center; }
+    .lrow .nm { font-size: 14px; font-weight: 900; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lrow .sb { font-size: 11px; color: #666; }
+    #top3 .more { margin-top: auto; padding-top: 10px; border-top: 1px solid #2a2a2a; font-size: 12px; font-weight: 900; color: #ff6a00; }
+    #tabs { display: flex; flex-wrap: wrap; border-bottom: 2px solid #2a2a2a; }
+    .tab { padding: 10px 18px; font: 900 14px 'Nunito', sans-serif; color: #aaa; background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -2px; cursor: pointer; }
+    .tab:hover { color: #ff6a00; }
+    .tab.on { color: #ff6a00; border-bottom-color: #ff6a00; }
+    .tab.off { color: #666; cursor: default; }
+    .tab.off:hover { color: #666; }
+    #yourvid { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 260px; background: #1e1e1e; border: 2px dashed #ff6a00; text-align: center; padding: 20px; }
+    #yourvid .big { font-family: 'Bangers', Impact, fantasy; font-size: 32px; letter-spacing: 2px; color: #ff6a00; line-height: 1.1; }
+    #yourvid p { font-size: 13px; font-weight: 700; color: #aaa; }
+    #yourvid .go { height: 56px; padding: 0 32px; margin-top: 6px; display: inline-flex; align-items: center; background: #ff6a00; color: #fff; font: 900 18px 'Nunito', sans-serif; }
+    #yourvid:hover .go { background: #e05a00; }
+    footer { background: #1a1a1a; border-top: 4px solid #ff6a00; padding: 14px 20px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+<div id="topbar">
+  <a href="index.html" id="logo">SOMALITUBE!!!!</a>
+  <div id="search-wrap">
+    <input type="text" id="search-input" placeholder="Serch for de keeg videos" />
+    <button id="search-btn">GO</button>
+  </div>
+  <a href="channels.html" class="topbar-btn outline">All chanals..</a>
+  <div id="upload-btn-wrap"></div>
+  <div id="auth-area">
+    <a href="login.html" class="auth-btn" id="btn-login">Log de In</a>
+    <a href="signup.html" class="auth-btn" id="btn-signup">Sign de Up</a>
+  </div>
+</div>
+<main>
+  <section id="hero-row">
+    <div id="feat">
+      <div class="section-label">Video of de day</div>
+      <a href="#" id="feat-thumb"><img id="feat-img" alt="tembnail" /><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></a>
+      <a href="#" id="feat-title">...</a>
+      <div id="feat-meta"></div>
+    </div>
+    <aside id="questbox" aria-label="Daily quests">
+      <h3>Daily Quests <small id="q-count"></small></h3>
+      <div id="q-list"></div>
+      <div class="qfoot" id="q-foot"></div>
+    </aside>
+    <aside id="top3">
+      <div class="section-label">Most Populer Somalitubers:</div>
+      <div id="top3-list"><div class="v-meta">Loading...</div></div>
+      <a href="channels.html" class="more">See everi chanal &rarr;</a>
+    </aside>
+  </section>
+
+  <nav id="tabs" aria-label="Feeds">
+    <button class="tab on" id="tab-you">For de you</button>
+    <button class="tab" id="tab-new">Newast</button>
+    <button class="tab off" disabled>Somali Shorts (cumming soon)</button>
+  </nav>
+
+  <section>
+    <div class="section-label" style="margin-bottom:16px;">Newast Videoss:</div>
+    <div class="video-grid" id="grid">
+      <a href="upload.html" id="yourvid">
+        <div class="big">YOUR VID HERE</div>
+        <p>Post it yourself. Shrinks to 10MB, goes live right away.</p>
+        <div class="go">Make de video!</div>
+      </a>
+      <div id="dyn" style="display:contents"></div>
+      <!-- Old hand-added videos below. New uploads appear above them automatically. -->
+<div class="video-card">
+      <a href="watch5.html" style="text-decoration:none;">
+        <div class="thumb-wrap">
+          <img src="hossipossi.png" alt="tembnail" />
+          <div class="play-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <div class="duration">1:02</div>
+        </div>
+      </a>
+      <div class="v-info">
+        <a href="watch5.html" class="v-title">Tuff Hossi Edit</a>
+        <div class="v-channel"><a href="user.html?uid=aLMhMkZH07NqiiAZQs2DcyVrHTn2">DihRider6767ThroatGoat</a><span class="bdg-slot" data-uid="aLMhMkZH07NqiiAZQs2DcyVrHTn2"></span></div>
+        <div class="v-meta">Keeg &middot; 22, zepptembr 2026</div>
+      </div>
+    </div>
+    
+        <div class="video-card">
+      <a href="watch4.html" style="text-decoration:none;">
+        <div class="thumb-wrap">
+          <img src="hotgril.png" alt="tembnail" />
+          <div class="play-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <div class="duration">0:15</div>
+        </div>
+      </a>
+      <div class="v-info">
+        <a href="watch4.html" class="v-title">hot gril</a>
+        <div class="v-channel"><a href="user.html?uid=mao8ESnDubfBzCP0oIeSPV8HlKE3">HEnri</a><span class="bdg-slot" data-uid="mao8ESnDubfBzCP0oIeSPV8HlKE3"></span></div>
+        <div class="v-meta">Keeg &middot; 22, zepptembr 2026</div>
+      </div>
+    </div>
+    
+        <div class="video-card">
+      <a href="watch3.html" style="text-decoration:none;">
+        <div class="thumb-wrap">
+          <img src="rolljordanroll.png" alt="tembnail" />
+          <div class="play-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <div class="duration">0:22</div>
+        </div>
+      </a>
+      <div class="v-info">
+        <a href="watch3.html" class="v-title">you will never be troy... (troy)</a>
+        <div class="v-channel"><a href="user.html?uid=0EpD6FuxZyTwVvKhpKOlK5bleXt2">BigH</a><span class="bdg-slot" data-uid="0EpD6FuxZyTwVvKhpKOlK5bleXt2"></span></div>
+        <div class="v-meta">Keeg &middot; 21, zepptembr 2026</div>
+      </div>
+    </div>
+    
+        <div class="video-card">
+      <a href="watch2.html" style="text-decoration:none;">
+        <div class="thumb-wrap">
+          <img src="nigga.png" alt="tembnail" />
+          <div class="play-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <div class="duration">0:09</div>
+        </div>
+      </a>
+      <div class="v-info">
+        <a href="watch2.html" class="v-title">Super aura</a>
+        <div class="v-channel"><a href="user.html?uid=SSaWk5JpQvQipwOeCZY6QLM90SD2">BaFahh</a><span class="bdg-slot" data-uid="SSaWk5JpQvQipwOeCZY6QLM90SD2"></span></div>
+        <div class="v-meta">Keeg &middot; 24, marsh 2026</div>
+      </div>
+    </div>
+    
+        <div class="video-card">
+      <a href="watch1.html" style="text-decoration:none;">
+        <div class="thumb-wrap">
+          <img src="howdovatt.png" alt="tembnail" />
+          <div class="play-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <div class="duration">2:16</div>
+        </div>
+      </a>
+      <div class="v-info">
+        <a href="watch1.html" class="v-title">how upload video on de somalitube</a>
+        <div class="v-channel"><a href="user.html?uid=6NRszsAO2mhSOuhxhrMrufWFiDE2">Pål Fiks!</a><span class="bdg-slot" data-uid="6NRszsAO2mhSOuhxhrMrufWFiDE2"></span></div>
+        <div class="v-meta">Keeg &middot; 24, marsh 2026</div>
+      </div>
+    </div>
+
+        <div class="video-card">
+      <a href="watch.html" style="text-decoration:none;">
+        <div class="thumb-wrap">
+          <img src="18yearsofporn.png" alt="tembnail" />
+          <div class="play-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <div class="duration">2:27</div>
+        </div>
+      </a>
+      <div class="v-info">
+        <a href="watch.html" class="v-title">HairyPrey91</a>
+        <div class="v-channel"><a href="user.html?uid=BluFJm8y5cgTyQNRaU4ClJ8OJUK2">HairyPrey91</a><span class="bdg-slot" data-uid="BluFJm8y5cgTyQNRaU4ClJ8OJUK2"></span></div>
+        <div class="v-meta">Keeg &middot; 22, marsh 2026</div>
+      </div>
+    </div>
+        </div>
+  </section>
+</main>
+<footer>&copy; 1972 SomaliTube. No rights reserved. <span style="margin:0 8px;">|</span> Version 1.0</footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="st.js"></script>
+<script>
+  var $ = function(i) { return document.getElementById(i); };
+  auth.onAuthStateChanged(function(user) { stNav(user); });
+
+  /* ----- daily quests (3 per day, reset at midnight UTC) ----- */
+  var qUser = null;
+  function qLeft() { var m = Math.floor(stMsToReset() / 60000); return Math.floor(m / 60) + 'h ' + (m % 60) + 'm'; }
+  function qRow(id, st) {
+    var Q = QUESTS[id], right = st === 'got' ? '&#10003; Got it' : st === 'done' ? '<button class="qs" data-claim="' + id + '">CLAIM!</button>' : (qUser ? 'Not done yet' : '');
+    return '<div class="q ' + (st === 'done' ? 'done' : st === 'got' ? 'got' : '') + '"><div class="qi">' + Q.i + '</div><div class="qt">' + esc(Q.t) + '</div>' +
+      '<div class="qr">+' + Q.pts + ' ' + ST_COIN + '</div>' + (right ? (st === 'done' ? right : '<div class="qs">' + right + '</div>') : '') + '</div>';
+  }
+  function renderQuests() {
+    var ids = stQuestsToday(), list = $('q-list'), foot = $('q-foot');
+    if (!qUser) {
+      $('q-count').textContent = '';
+      list.innerHTML = ids.map(function(id) { return qRow(id, 'todo'); }).join('');
+      foot.innerHTML = '<div class="qnote">Log in to do quests and earn SomaliPoints. 30 points = 1 sub!</div><a href="login.html" class="qlogin">Log de In</a>';
+      return;
+    }
+    var day = stDay(), W = db.collection('wallets').doc(qUser.uid);
+    Promise.all([W.collection('acts').where('day', '==', day).get(), W.collection('claims').where('day', '==', day).get()]).then(function(r) {
+      var acts = {}, claims = {}, got = 0;
+      r[0].forEach(function(d) { acts[d.data().q] = 1; }); r[1].forEach(function(d) { claims[d.data().q] = 1; });
+      list.innerHTML = ids.map(function(id) { var st = claims[id] ? 'got' : acts[id] ? 'done' : 'todo'; if (claims[id]) got++; return qRow(id, st); }).join('');
+      $('q-count').textContent = got + '/' + DAILY_QUESTS + ' done';
+      foot.innerHTML = '<button type="button" class="qbal" id="q-bal" title="Click to spend your points">' + ST_COIN + '<span class="pts-n">' + stFmt(ST_PTS) + '</span> SomaliPoints &middot; spend &rsaquo;</button><span id="q-reset">' + (got >= DAILY_QUESTS ? 'All done! New quests in ' : 'New quests in ') + qLeft() + '</span>';
+      $('q-bal').onclick = stShop;
+    }).catch(function(e) { list.innerHTML = '<div class="qnote">Could not load quests: ' + esc(e.message) + '</div>'; });
+  }
+  $('q-list').addEventListener('click', function(e) {
+    var b = e.target.closest('[data-claim]'); if (!b) return; b.disabled = true; b.textContent = '...';
+    stClaim(b.dataset.claim).then(renderQuests).catch(function(err) { alert(err.message); renderQuests(); });
+  });
+  setInterval(function() { var r = $('q-reset'); if (r) r.textContent = r.textContent.replace(/in .*$/, 'in ' + qLeft()); if (stMsToReset() < 1000) renderQuests(); }, 30000);
+  auth.onAuthStateChanged(function(user) { qUser = user; renderQuests(); });
+
+  /* ----- top 3 ----- */
+  stBadges().then(function(m) {
+    var ids = Object.keys(m).filter(function(id) { return m[id].rank > 0; }).sort(function(a, b) { return m[a].rank - m[b].rank; });
+    $('top3-list').innerHTML = ids.length ? ids.map(function(id) {
+      var c = m[id];
+      return '<a href="user.html?uid=' + id + '" class="lrow"><div class="rk">' + c.rank + '</div>' + stAv(c.name, id, 36) +
+        '<div style="min-width:0"><div class="nm">' + esc(c.name) + stSlot(id) + '</div><div class="sb">' + c.subs + ' subscriber' + (c.subs !== 1 ? 's' : '') + '</div></div></a>';
+    }).join('') : '<div class="v-meta" style="padding:8px 0">No subs yet. Be de first to get one!</div>';
+  });
+
+  /* ----- videos ----- */
+  var vids = [], likes = {}, shuffled = [], mode = 'you';
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function renderGrid() {
+    var list = mode === 'new' ? vids : shuffled;
+    $('dyn').innerHTML = list.map(function(x) { return stCard(x.v, x.id, likes[x.id]); }).join('');
+  }
+  function renderFeat() {
+    var best = null;
+    vids.forEach(function(x) { var l = (likes[x.id] || { l: 0 }).l; if (!best || l > best.l) best = { x: x, l: l }; });
+    if (best) {
+      var v = best.x.v, href = 'watch.html?v=' + best.x.id;
+      $('feat-thumb').href = href; $('feat-img').src = v.thumbURL;
+      $('feat-title').href = href; $('feat-title').textContent = v.title;
+      $('feat-meta').innerHTML = '<a href="user.html?uid=' + esc(v.uid) + '">' + esc(v.username) + '</a>' + stSlot(v.uid) + '<span>Keeg &middot; ' + stDate(v.createdAt) + '</span>';
+      return;
+    }
+    var c = document.querySelector('#grid .video-card');   /* no uploads yet: feature the first old card */
+    if (c) {
+      var t = c.querySelector('.v-title'), ch = c.querySelector('.v-channel a');
+      $('feat-thumb').href = t.href; $('feat-img').src = c.querySelector('img').src;
+      $('feat-title').href = t.href; $('feat-title').textContent = t.textContent;
+      $('feat-meta').innerHTML = '<a href="' + ch.getAttribute('href') + '">' + esc(ch.textContent) + '</a>' + c.querySelector('.v-meta').outerHTML;
+    }
+  }
+  db.collection('videos').orderBy('createdAt', 'desc').limit(40).get().then(function(s) {
+    vids = s.docs.map(function(d) { return { id: d.id, v: d.data() }; });
+    return stLikes(vids.map(function(x) { return x.id; }));
+  }).then(function(l) { likes = l; shuffled = shuffle(vids); renderGrid(); renderFeat(); })
+    .catch(function(e) { console.error(e); renderFeat(); });
+  $('tab-you').onclick = function() { mode = 'you'; shuffled = shuffle(vids); $('tab-you').className = 'tab on'; $('tab-new').className = 'tab'; renderGrid(); };
+  $('tab-new').onclick = function() { mode = 'new'; $('tab-new').className = 'tab on'; $('tab-you').className = 'tab'; renderGrid(); };
+
+  /* ----- search ----- */
+  function runSearch() {
+    var q = $('search-input').value.toLowerCase().trim();
+    document.querySelectorAll('.video-card').forEach(function(card) {
+      var t = card.querySelector('.v-title').textContent.toLowerCase();
+      card.style.display = (!q || t.indexOf(q) > -1) ? 'flex' : 'none';
+    });
+  }
+  $('search-btn').addEventListener('click', runSearch);
+  $('search-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') runSearch(); });
+</script>
+</body>
+</html>

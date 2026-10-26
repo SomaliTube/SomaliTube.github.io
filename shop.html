@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop - SomaliTube</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; color: #f1f1f1; font-family: 'Nunito', Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    a { color: inherit; text-decoration: none; }
+    #topbar { background: #1a1a1a; border-bottom: 4px solid #ff6a00; min-height: 68px; display: flex; flex-wrap: wrap; align-items: center; padding: 8px 16px; gap: 10px; position: sticky; top: 0; z-index: 100; }
+    #logo { font-family: 'Bangers', Impact, fantasy; font-size: 28px; color: #fff; letter-spacing: 2px; text-shadow: 3px 3px 0px #ff6a00; white-space: nowrap; }
+    #auth-area { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .auth-btn { height: 36px; padding: 0 20px; font-size: 13px; font-weight: 900; display: inline-flex; align-items: center; border: 2px solid #ff6a00; background: #ff6a00; color: #fff; }
+    #btn-login { background: transparent; color: #ff6a00; }
+    main { flex: 1; max-width: 900px; width: 100%; margin: 0 auto; padding: 28px 16px; display: flex; flex-direction: column; gap: 14px; }
+    .section-label { font-family: 'Bangers', Impact, fantasy; font-size: 24px; color: #ff6a00; letter-spacing: 2px; border-left: 5px solid #ff6a00; padding-left: 12px; line-height: 1.1; margin-top: 10px; }
+    .hint { font-size: 13px; color: #aaa; line-height: 1.5; }
+    .hint b { color: #ff6a00; }
+    .pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+    .pc { background: #1e1e1e; border: 2px solid #2a2a2a; padding: 10px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; }
+    .pc:hover { border-color: #ff6a00; }
+    .pc .pi { width: 100%; aspect-ratio: 1; background: #2a2a2a center / cover no-repeat; position: relative; }
+    .pc .tag { position: absolute; top: 6px; left: 6px; background: #2fd16f; color: #111; font-size: 11px; font-weight: 900; padding: 2px 7px; }
+    .pc .tag.use { background: #ff6a00; color: #fff; }
+    .pc .pn { font: 18px 'Bangers', Impact, fantasy; letter-spacing: 1px; }
+    .pc .pp { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 900; color: #ffb066; }
+    .pc .pp img { width: 16px; height: 16px; object-fit: contain; }
+    .pc .go { height: 32px; border: 2px solid #ff6a00; background: transparent; color: #ff6a00; font: 900 12px 'Nunito', sans-serif; cursor: pointer; }
+    .pc:hover .go { background: #ff6a00; color: #fff; }
+    .pv { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; padding: 14px 0; }
+    .pv .big { width: 200px; height: 200px; background: #2a2a2a center / cover no-repeat; border: 3px solid #ff6a00; }
+    .pv .lbl { font-size: 11px; font-weight: 900; color: #888; margin-top: 4px; text-align: center; }
+    footer { background: #1a1a1a; border-top: 4px solid #ff6a00; padding: 14px 20px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+<div id="topbar">
+  <a href="index.html" id="logo">SOMALITUBE!!!!</a>
+  <div id="upload-btn-wrap"></div>
+  <div id="auth-area"><a href="login.html" class="auth-btn" id="btn-login">Log In</a><a href="signup.html" class="auth-btn">Sign Up</a></div>
+</div>
+<main>
+  <div class="shop-bal" id="bal"></div>
+  <p class="hint">Earn <b>SomaliPoints</b> from the daily quests on the homepage, then spend them here.</p>
+  <div id="shop-msg" class="shop-msg"></div>
+
+  <div class="section-label">Subs for ur chanal</div>
+  <p class="hint"><b id="cost-line"></b> Bought subs show up as "Bought Sub" in your subscribers list.</p>
+  <div id="subs"></div>
+
+  <div class="section-label">Profile pics for ur chanal</div>
+  <p class="hint">Click a picture to preview it before you buy. Pictures you own can be picked in <a href="profile.html" style="color:#ff6a00;font-weight:900">your profile</a> and in comments.</p>
+  <div class="pgrid" id="pics"></div>
+</main>
+<footer>&copy; 1972 SomaliTube. No rights reserved. <span style="margin:0 8px;">|</span> Version 1.0</footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="st.js"></script>
+<script>
+  var $ = function(i) { return document.getElementById(i); };
+  var cu = null, owned = {}, curPic = '';
+  $('cost-line').textContent = SUB_COST + ' points = 1 sub.';
+  $('bal').innerHTML = ST_COIN + '<b class="pts-n">' + stFmt(ST_PTS) + '</b><span>SomaliPoints</span>';
+
+  auth.onAuthStateChanged(function(u) {
+    if (!u) return location.href = 'login.html';
+    cu = u; stNav(u); loadMine();
+  });
+  window.addEventListener('stpoints', function() { drawSubs(); drawPics(); });
+
+  function loadMine() {
+    Promise.all([stOwnedPics(), db.collection('users').doc(cu.uid).get()]).then(function(r) {
+      owned = {}; r[0].forEach(function(f) { owned[f] = 1; });
+      curPic = r[1].exists ? (r[1].data().pfpURL || '') : '';
+      drawSubs(); drawPics();
+    });
+  }
+  function say(t, ok) { var m = $('shop-msg'); m.className = 'shop-msg ' + (ok ? 'ok' : 'bad'); m.textContent = t; }
+
+  /* ---- subs ---- */
+  function drawSubs() {
+    $('subs').innerHTML = SHOP_SIZES.map(function(n) {
+      var c = n * SUB_COST, ok = ST_PTS >= c;
+      return '<div class="shop-row"><div><div class="shop-n">' + n + ' Sub' + (n > 1 ? 's' : '') + '</div><div class="shop-c">' + ST_COIN + ' ' + stFmt(c) + '</div></div>' +
+        '<button type="button" class="shop-buy" data-n="' + n + '"' + (ok ? '' : ' disabled') + '>' + (ok ? 'Buy' : 'Need ' + stFmt(c - ST_PTS) + ' more') + '</button></div>';
+    }).join('');
+  }
+  /* buttons ask twice so u cant buy by accident */
+  function sure(b, label, done) {
+    if (!b.dataset.sure) {
+      b.dataset.sure = 1; b.dataset.label = b.textContent; b.textContent = 'Sure? Click again'; b.classList.add('sure');
+      setTimeout(function() { if (b.isConnected && b.dataset.sure) { delete b.dataset.sure; b.classList.remove('sure'); b.textContent = b.dataset.label; } }, 3000);
+      return;
+    }
+    b.disabled = true; b.textContent = '...'; done();
+  }
+  $('subs').addEventListener('click', function(e) {
+    var b = e.target.closest('[data-n]'); if (!b || b.disabled) return; var n = +b.dataset.n;
+    sure(b, 'Buy', function() {
+      stBuySubs(n).then(function() { say('Done! ' + n + ' Bought Sub' + (n > 1 ? 's' : '') + ' added to your chanal.', true); })
+        .catch(function(err) { say(err.message, false); drawSubs(); });
+    });
+  });
+
+  /* ---- profile pics ---- */
+  function drawPics() {
+    var h = '';
+    for (var n = PIC_FIRST; n <= PIC_LAST; n++) {
+      var f = stPicFile(n), has = owned[f], inUse = curPic === f;
+      h += '<div class="pc" data-n="' + n + '"><div class="pi" style="background-image:url(' + f + ')">' + (inUse ? '<span class="tag use">IN USE</span>' : has ? '<span class="tag">OWNED</span>' : '') + '</div>' +
+        '<div class="pn">Pic #' + n + '</div>' +
+        (has ? '<div class="pp">&#10003; You own this</div>' : '<div class="pp">' + ST_COIN + ' ' + stFmt(stPicPrice(n)) + '</div>') +
+        '<button type="button" class="go">' + (has ? (inUse ? 'Preview' : 'Preview / Use') : 'Preview') + '</button></div>';
+    }
+    $('pics').innerHTML = h;
+  }
+  $('pics').addEventListener('click', function(e) { var c = e.target.closest('.pc'); if (c) preview(+c.dataset.n); });
+
+  function preview(n) {
+    var f = stPicFile(n), o = document.createElement('div'); o.className = 'st-modal';
+    o.innerHTML = '<div class="st-box" style="max-width:480px"><div class="st-head"><span>Pic #' + n + '</span><button type="button" class="st-x" aria-label="Close">&times;</button></div><div class="st-body">' +
+      '<div class="pv"><div><div class="big" style="background-image:url(' + f + ')"></div><div class="lbl">Full size</div></div>' +
+      '<div><div class="av" style="width:90px;height:90px;font-size:40px;background:#2a2a2a center/cover url(' + f + ')"></div><div class="lbl">On ur chanal</div></div>' +
+      '<div><div class="av" style="width:38px;height:38px;background:#2a2a2a center/cover url(' + f + ')"></div><div class="lbl">Top bar</div></div></div>' +
+      '<div class="shop-msg" id="pv-msg"></div><button type="button" class="shop-buy" id="pv-btn" style="width:100%"></button></div></div>';
+    document.body.appendChild(o);
+    function paint() {
+      var b = o.querySelector('#pv-btn'); if (!b || !o.isConnected) return; b.dataset.sure = ''; b.classList.remove('sure'); b.disabled = false;
+      var has = owned[f], price = stPicPrice(n);
+      if (has) { b.textContent = curPic === f ? 'This is ur picture now' : 'Use as my picture'; b.disabled = curPic === f; b.dataset.mode = 'use'; }
+      else if (ST_PTS >= price) { b.textContent = 'Buy for ' + stFmt(price) + ' points'; b.dataset.mode = 'buy'; }
+      else { b.textContent = 'Need ' + stFmt(price - ST_PTS) + ' more points'; b.disabled = true; b.dataset.mode = 'buy'; }
+    }
+    function pvSay(t, ok) { var m = o.querySelector('#pv-msg'); if (m) { m.className = 'shop-msg ' + (ok ? 'ok' : 'bad'); m.textContent = t; } }
+    function use() {
+      db.collection('users').doc(cu.uid).update({ pfpURL: f }).then(function() { curPic = f; stRefreshBadges(); pvSay('Done! This is ur picture now.', true); paint(); drawPics(); })
+        .catch(function(err) { pvSay(err.message, false); paint(); });
+    }
+    o.addEventListener('click', function(e) {
+      if (e.target === o || e.target.classList.contains('st-x')) { o.remove(); window.removeEventListener('stpoints', paint); return; }
+      var b = e.target.closest('#pv-btn'); if (!b || b.disabled) return;
+      if (b.dataset.mode === 'use') { b.disabled = true; use(); return; }
+      sure(b, '', function() {
+        stBuyPic(n).then(function() { owned[f] = 1; drawPics(); pvSay('Bought! Press the button to use it.', true); paint(); })
+          .catch(function(err) { pvSay(err.message, false); paint(); });
+      });
+    });
+    window.addEventListener('stpoints', paint); paint();
+  }
+</script>
+</body>
+</html>
