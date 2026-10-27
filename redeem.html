@@ -62,12 +62,18 @@
         return t.get(codeRef).then(function(doc) {
           if (!doc.exists) throw new Error('Invalid code.');
           var data = doc.data();
-          if (data.claimedBy && data.claimedBy[me.uid]) throw new Error('You already redeemed this code.');
+          if (data.claimedGlobal) throw new Error('This code has already been redeemed.');
+          if (data.claimedBy && data.claimedBy[me.uid]) throw new Error('You have already redeemed this code.');
+          
           var ptsToAdd = data.points || 0;
           return t.get(walletRef).then(function(wDoc) {
             var currentPts = wDoc.exists ? (wDoc.data().points || 0) : 0;
             t.set(walletRef, { points: currentPts + ptsToAdd }, { merge: true });
-            t.update(codeRef, { ['claimedBy.' + me.uid]: true });
+            if (data.singleUse) {
+              t.update(codeRef, { claimedGlobal: true, ['claimedBy.' + me.uid]: true });
+            } else {
+              t.update(codeRef, { ['claimedBy.' + me.uid]: true });
+            }
             return ptsToAdd;
           });
         });
