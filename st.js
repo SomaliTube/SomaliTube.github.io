@@ -334,7 +334,7 @@ var STC={
   /* the old top buttons are replaced by the sidebar */
   [].forEach.call(tb.querySelectorAll('a.topbar-btn[href="channels.html"]'),function(e){e.remove()});
   var here=location.pathname.split('/').pop()||'index.html';
-  var items=[['index.html','&#127968;','Home'],['upload.html','&#11014;&#65039;','Upload Video'],['channels.html','&#128250;','All Chanals'],['shop.html',ST_COIN,'Shop'],['dashboard.html','&#127916;','My Vids'],['admin.html','&#128737;&#65039;','Admin']];
+  var items=[['index.html','&#127968;','Home'],['upload.html','&#11014;&#65039;','Upload Video'],['channels.html','&#128250;','All Chanals'],['shop.html',ST_COIN,'Shop'],['dashboard.html','&#127916;','My Vids'],['chat.html','&#128172;','Chat'],['admin.html','&#128737;&#65039;','Admin']];
   var sb=document.createElement('nav');sb.id='sidebar';sb.setAttribute('aria-label','Menu');
   sb.innerHTML=items.map(function(x){var adm=x[0]==='admin.html';return '<a class="sb-btn'+(adm?' sb-admin':'')+(here===x[0]?' on':'')+'" href="'+x[0]+'"'+(adm?' id="sb-admin" style="display:none"':'')+' title="'+x[2]+'"><span class="sb-i">'+x[1]+'</span><span class="sb-t">'+x[2]+'</span></a>'}).join('');
   document.body.appendChild(sb);document.body.classList.add('has-side');

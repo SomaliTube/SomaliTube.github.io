@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redeem Code - SomaliTube</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; color: #f1f1f1; font-family: 'Nunito', sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
+    main { max-width: 500px; width: 100%; margin: 60px auto; padding: 30px; background: #1e1e1e; border: 3px solid #ff6a00; }
+    .section-label { font-family: 'Bangers', Impact, sans-serif; font-size: 26px; color: #ff6a00; letter-spacing: 2px; margin-bottom: 20px; }
+    input { width: 100%; padding: 12px; background: #2a2a2a; border: 2px solid #333; color: #fff; font-size: 15px; margin-bottom: 15px; outline: none; }
+    input:focus { border-color: #ff6a00; }
+    .btn { background: #ff6a00; color: #fff; border: 2px solid #ff6a00; padding: 10px 20px; font-weight: 900; cursor: pointer; width: 100%; font-size: 15px; }
+    .msg { margin-top: 15px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="section-label">Redeem Code</div>
+    <input type="text" id="code-input" placeholder="Enter code here...">
+    <button class="btn" onclick="redeemCode()">REDEEM</button>
+    <div id="redeem-msg" class="msg"></div>
+    <div style="margin-top:20px;"><a href="index.html" style="color:#ff6a00;font-weight:900;text-decoration:none;">&larr; Back to Home</a></div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="st.js"></script>
+  <script>
+    async function redeemCode() {
+      const code = document.getElementById('code-input').value.trim().toUpperCase();
+      const msgEl = document.getElementById('redeem-msg');
+      const user = auth.currentUser;
+      if (!user) { msgEl.style.color='#ff4444'; msgEl.innerText='Please log in first.'; return; }
+      if (!code) { msgEl.style.color='#ff4444'; msgEl.innerText='Enter a code.'; return; }
+
+      const codeRef = db.collection('redeem_codes').doc(code);
+      try {
+        await db.runTransaction(async t => {
+          const doc = await t.get(codeRef);
+          if (!doc.exists) throw new Error('Invalid code.');
+          const data = doc.data();
+          if (data.usedBy && data.usedBy.includes(user.uid)) throw new Error('You already used this code.');
+          
+          t.update(codeRef, { usedBy: firebase.firestore.FieldValue.arrayUnion(user.uid) });
+          t.set(db.collection('users').doc(user.uid), { points: firebase.firestore.FieldValue.increment(data.points) }, { merge: true });
+          
+          msgEl.style.color = '#44ff88';
+          msgEl.innerText = `Success! You received ${data.points} SomaliPoints!`;
+        });
+      } catch(e) {
+        msgEl.style.color = '#ff4444';
+        msgEl.innerText = e.message;
+      }
+    }
+  </script>
+</body>
+</html>

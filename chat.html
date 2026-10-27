@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat - SomaliTube</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; color: #f1f1f1; font-family: 'Nunito', Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    a { color: inherit; text-decoration: none; }
+    #topbar { background: #1a1a1a; border-bottom: 4px solid #ff6a00; height: 68px; display: flex; align-items: center; padding: 0 16px; gap: 10px; position: sticky; top: 0; z-index: 100; }
+    #logo { font-family: 'Bangers', Impact, fantasy; font-size: 28px; color: #fff; letter-spacing: 2px; text-shadow: 3px 3px 0px #ff6a00; white-space: nowrap; }
+    #auth-area { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+    main.chat-container { flex: 1; display: flex; height: calc(100vh - 68px); max-width: 1200px; width: 100%; margin: 0 auto; background: #181818; border-left: 2px solid #2a2a2a; border-right: 2px solid #2a2a2a; }
+
+    /* Left Sidebar: Contacts */
+    .contacts-panel { width: 320px; border-right: 2px solid #2a2a2a; display: flex; flex-direction: column; background: #1a1a1a; flex-shrink: 0; }
+    .contacts-header { padding: 16px; border-bottom: 2px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .contacts-header h2 { font-family: 'Bangers', Impact, fantasy; font-size: 22px; color: #ff6a00; letter-spacing: 1px; white-space: nowrap; }
+    .add-person-btn { background: #ff6a00; color: #fff; border: none; padding: 6px 10px; font-weight: 900; font-size: 11px; cursor: pointer; font-family: 'Nunito', sans-serif; white-space: nowrap; flex-shrink: 0; }
+    .add-person-btn:hover { background: #e05a00; }
+    .contacts-list { flex: 1; overflow-y: auto; }
+    .contact-card { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #262626; cursor: pointer; transition: background 0.15s; position: relative; }
+    .contact-card:hover, .contact-card.active { background: #2a2a2a; }
+    .contact-info { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .contact-name { font-weight: 900; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+    .menu-dots { cursor: pointer; padding: 4px 8px; font-size: 16px; color: #888; border: none; background: transparent; }
+    .menu-dots:hover { color: #ff6a00; }
+    .dropdown-menu { display: none; position: absolute; right: 12px; top: 40px; background: #222; border: 1px solid #ff6a00; z-index: 10; width: 130px; }
+    .dropdown-menu.show { display: block; }
+    .dropdown-item { padding: 8px 12px; font-size: 12px; color: #ff5a5a; font-weight: 900; cursor: pointer; }
+    .dropdown-item:hover { background: #ff5a5a; color: #fff; }
+
+    /* Right Side: Chat Window */
+    .chat-window { flex: 1; display: flex; flex-direction: column; background: #111; min-width: 0; }
+    .chat-header { padding: 16px; background: #1a1a1a; border-bottom: 2px solid #2a2a2a; display: flex; align-items: center; gap: 12px; }
+    .chat-header .active-title { font-family: 'Bangers', Impact, fantasy; font-size: 20px; color: #ff6a00; letter-spacing: 1px; }
+    .messages-box { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .msg-row { display: flex; align-items: flex-end; gap: 8px; max-width: 75%; }
+    .msg-row.me { align-self: flex-end; flex-direction: row-reverse; }
+    .msg-row.them { align-self: flex-start; }
+    .msg-bubble { padding: 10px 14px; font-size: 13px; line-height: 1.4; border-radius: 4px; word-break: break-word; }
+    .msg-row.me .msg-bubble { background: #ff6a00; color: #fff; font-weight: 700; }
+    .msg-row.them .msg-bubble { background: #2a2a2a; color: #f1f1f1; border: 1px solid #333; }
+
+    .chat-input-area { padding: 16px; background: #1a1a1a; border-top: 2px solid #2a2a2a; display: flex; gap: 10px; }
+    .chat-input { flex: 1; height: 40px; background: #2a2a2a; border: 2px solid #333; color: #fff; font-size: 13px; padding: 0 12px; outline: none; font-family: 'Nunito', sans-serif; }
+    .chat-input:focus { border-color: #ff6a00; }
+    .send-btn { height: 40px; padding: 0 20px; background: #ff6a00; border: none; color: #fff; font-weight: 900; cursor: pointer; font-family: 'Nunito', sans-serif; }
+
+    /* User Picker Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { width: 400px; max-height: 500px; background: #1a1a1a; border: 2px solid #ff6a00; display: flex; flex-direction: column; padding: 20px; }
+    .modal-title { font-family: 'Bangers', Impact, fantasy; font-size: 22px; color: #ff6a00; margin-bottom: 12px; }
+    .modal-search { width: 100%; height: 36px; background: #2a2a2a; border: 2px solid #333; color: #fff; padding: 0 10px; outline: none; margin-bottom: 12px; font-family: 'Nunito', sans-serif; }
+    .modal-user-list { flex: 1; overflow-y: auto; max-height: 300px; display: flex; flex-direction: column; gap: 8px; }
+    .picker-item { display: flex; align-items: center; gap: 10px; padding: 8px; background: #222; cursor: pointer; border: 1px solid #333; }
+    .picker-item:hover { border-color: #ff6a00; background: #2a2a2a; }
+    .close-modal-btn { margin-top: 12px; background: #333; color: #aaa; border: none; padding: 8px; font-weight: 900; cursor: pointer; }
+  </style>
+</head>
+<body class="has-side">
+  <div id="topbar">
+    <a href="index.html" id="logo">SOMALITUBE</a>
+    <div id="auth-area"></div>
+  </div>
+
+  <main class="chat-container">
+    <!-- Contacts Sidebar -->
+    <div class="contacts-panel">
+      <div class="contacts-header">
+        <h2>Chats</h2>
+        <button class="add-person-btn" onclick="openUserPicker()">+ Add Person</button>
+      </div>
+      <div class="contacts-list" id="contacts-list"></div>
+    </div>
+
+    <!-- Active Chat Conversation -->
+    <div class="chat-window">
+      <div class="chat-header">
+        <div id="header-avatar-wrap"></div>
+        <span class="active-title" id="chat-title">Select a contact to start chatting</span>
+      </div>
+      <div class="messages-box" id="messages-box"></div>
+      <div class="chat-input-area">
+        <input type="text" class="chat-input" id="chat-input" placeholder="Type a message..." disabled onkeypress="if(event.key==='Enter')sendMessage()">
+        <button class="send-btn" id="send-btn" disabled onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add Person Picker Modal -->
+  <div class="modal-overlay" id="user-modal">
+    <div class="modal-box">
+      <div class="modal-title">Add Person to Chat</div>
+      <input type="text" class="modal-search" id="modal-search-input" placeholder="Search users by name..." oninput="filterUserList()">
+      <div class="modal-user-list" id="modal-user-list">Loading...</div>
+      <button class="close-modal-btn" onclick="closeUserPicker()">Close</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="st.js"></script>
+  <script>
+    var me = null;
+    var activeContact = null;
+    var allUsersCache = [];
+    var msgUnsub = null;
+
+    auth.onAuthStateChanged(function(user) {
+      if (!user) { location.href = 'login.html'; return; }
+      me = user;
+      stNav(user);
+      loadContacts();
+
+      var urlParams = new URLSearchParams(window.location.search);
+      var targetUid = urlParams.get('uid');
+      if (targetUid && targetUid !== me.uid) {
+        addContact(targetUid, true);
+      }
+    });
+
+    function loadContacts() {
+      db.collection('users').doc(me.uid).collection('contacts').onSnapshot(function(snap) {
+        var list = document.getElementById('contacts-list');
+        list.innerHTML = '';
+        if (snap.empty) {
+          list.innerHTML = '<p style="padding:16px;font-size:12px;color:#666;">No contacts yet. Click "+ Add Person" above!</p>';
+          return;
+        }
+        snap.forEach(function(doc) {
+          var c = doc.data();
+          var card = document.createElement('div');
+          card.className = 'contact-card' + (activeContact && activeContact.uid === doc.id ? ' active' : '');
+          card.onclick = function(e) {
+            if (e.target.classList.contains('menu-dots') || e.target.classList.contains('dropdown-item')) return;
+            selectContact(doc.id, c.username);
+          };
+
+          card.innerHTML =
+            '<div class="contact-info">' +
+              stAv(c.username, doc.id, 34) +
+              '<span class="contact-name">' + esc(c.username) + '</span>' +
+            '</div>' +
+            '<button class="menu-dots" onclick="toggleMenu(event, '' + doc.id + '')">&#8942;</button>' +
+            '<div class="dropdown-menu" id="menu-' + doc.id + '">' +
+              '<div class="dropdown-item" onclick="removeContact('' + doc.id + '')">Remove User</div>' +
+            '</div>';
+          list.appendChild(card);
+        });
+      });
+    }
+
+    function toggleMenu(e, uid) {
+      e.stopPropagation();
+      document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+      var m = document.getElementById('menu-' + uid);
+      if (m) m.classList.toggle('show');
+    }
+
+    document.addEventListener('click', function() {
+      document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+    });
+
+    async function removeContact(uid) {
+      if (!me) return;
+      await db.collection('users').doc(me.uid).collection('contacts').doc(uid).delete();
+      if (activeContact && activeContact.uid === uid) {
+        activeContact = null;
+        document.getElementById('header-avatar-wrap').innerHTML = '';
+        document.getElementById('chat-title').innerText = 'Select a contact to start chatting';
+        document.getElementById('messages-box').innerHTML = '';
+        document.getElementById('chat-input').disabled = true;
+        document.getElementById('send-btn').disabled = true;
+      }
+    }
+
+    function selectContact(uid, name) {
+      activeContact = { uid: uid, name: name };
+      document.getElementById('header-avatar-wrap').innerHTML = stAv(name, uid, 36);
+      document.getElementById('chat-title').innerText = name;
+      document.getElementById('chat-input').disabled = false;
+      document.getElementById('send-btn').disabled = false;
+
+      var chatId = me.uid < uid ? me.uid + '_' + uid : uid + '_' + me.uid;
+      if (msgUnsub) msgUnsub();
+
+      msgUnsub = db.collection('chats').doc(chatId).collection('messages')
+        .orderBy('createdAt', 'asc')
+        .onSnapshot(function(snap) {
+          var box = document.getElementById('messages-box');
+          box.innerHTML = '';
+          snap.forEach(function(doc) {
+            var msg = doc.data();
+            var isMe = msg.sender === me.uid;
+            var senderUid = isMe ? me.uid : uid;
+            var senderName = isMe ? (me.displayName || 'Me') : name;
+
+            var row = document.createElement('div');
+            row.className = 'msg-row ' + (isMe ? 'me' : 'them');
+            row.innerHTML =
+              stAv(senderName, senderUid, 30) +
+              '<div class="msg-bubble">' + esc(msg.text) + '</div>';
+            box.appendChild(row);
+          });
+          box.scrollTop = box.scrollHeight;
+        });
+    }
+
+    async function sendMessage() {
+      var input = document.getElementById('chat-input');
+      var text = input.value.trim();
+      if (!text || !activeContact || !me) return;
+      input.value = '';
+
+      var chatId = me.uid < activeContact.uid ? me.uid + '_' + activeContact.uid : activeContact.uid + '_' + me.uid;
+      
+      await db.collection('chats').doc(chatId).collection('messages').add({
+        sender: me.uid,
+        text: text,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      await db.collection('users').doc(activeContact.uid).collection('contacts').doc(me.uid).set({
+        username: me.displayName || 'User',
+        addedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }
+
+    function openUserPicker() {
+      document.getElementById('user-modal').classList.add('open');
+      db.collection('users').get().then(function(snap) {
+        allUsersCache = [];
+        snap.forEach(function(doc) {
+          if (doc.id !== me.uid) {
+            allUsersCache.push({ uid: doc.id, name: doc.data().username || 'User' });
+          }
+        });
+        renderUserPicker(allUsersCache);
+      });
+    }
+
+    function closeUserPicker() {
+      document.getElementById('user-modal').classList.remove('open');
+    }
+
+    function renderUserPicker(arr) {
+      var list = document.getElementById('modal-user-list');
+      list.innerHTML = '';
+      if (arr.length === 0) { list.innerHTML = '<p style="font-size:12px;color:#666;">No users found.</p>'; return; }
+      arr.forEach(function(u) {
+        var item = document.createElement('div');
+        item.className = 'picker-item';
+        item.onclick = function() { addContact(u.uid, true); closeUserPicker(); };
+        item.innerHTML = stAv(u.name, u.uid, 28) + '<span style="font-size:13px;font-weight:900;">' + esc(u.name) + '</span>';
+        list.appendChild(item);
+      });
+    }
+
+    function filterUserList() {
+      var q = document.getElementById('modal-search-input').value.toLowerCase();
+      var filtered = allUsersCache.filter(u => u.name.toLowerCase().includes(q));
+      renderUserPicker(filtered);
+    }
+
+    async function addContact(targetUid, autoSelect) {
+      if (!me || targetUid === me.uid) return;
+      var doc = await db.collection('users').doc(targetUid).get();
+      if (!doc.exists) return;
+      var name = doc.data().username || 'User';
+
+      await db.collection('users').doc(me.uid).collection('contacts').doc(targetUid).set({
+        username: name,
+        addedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      if (autoSelect) {
+        selectContact(targetUid, name);
+      }
+    }
+  </script>
+</body>
+</html>

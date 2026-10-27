@@ -154,6 +154,7 @@
           var total = likes + dislikes;
           var pct = total > 0 ? Math.round((likes/total)*100) : 0;
 
+          var chatBtnHTML = (currentUser && currentUser.uid !== profileUid) ? '<a href="chat.html?uid=' + profileUid + '" class="topbar-btn outline" style="margin-left:8px;">💬 Chat</a>' : '';
           var subBtnHTML = currentUser
             ? '<button class="sub-btn ' + (isSubbed?'subbed':'') + '" id="sub-btn">' + (isSubbed ? 'Subcreibed! ✅' : 'Subscreib! ➕') + ' · ' + subCount + '</button>'
             : '<a href="login.html" class="sub-btn">Subscreib! ➕ · ' + subCount + '</a>';
@@ -177,7 +178,7 @@
                 '</div>' +
               '</div>' +
               metaHTML + bioHTML +
-              '<div class="actions">' + subBtnHTML + ratingHTML + '</div>' +
+              '<div class="actions">' + subBtnHTML + chatBtnHTML + ratingHTML + '</div>' +
             '</div>';
 
           document.getElementById('videos-section').style.display = 'block';
