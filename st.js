@@ -17,8 +17,9 @@ function stDate(iso){return iso?new Date(iso).toLocaleDateString():''}
 function stNav(user){
   var a=document.getElementById('auth-area');
   if(!user||!a)return;
-  a.innerHTML='<a href="profile.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#f1f1f1">'+stAv(user.displayName,user.uid,38)+'<span style="font-size:13px;font-weight:900">'+esc(user.displayName||'Profile')+'</span></a>'+stPtsPill();
+  a.innerHTML='<a href="user.html?uid='+user.uid+'" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#f1f1f1">'+stAv(user.displayName,user.uid,38)+'<span style="font-size:13px;font-weight:900">'+esc(user.displayName||'Profile')+'</span></a>'+stPtsPill();
   stWalletListen(user);
+  stInboxListen(user);
   var ad=document.getElementById('sb-admin');if(ad)ad.style.display=user.uid===OWNER_UID?'flex':'none';
 }
 var ST_UP='<svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 21H3V9h4v12zm14-11c0-1.1-.9-2-2-2h-5.3l.9-4.3v-.3c0-.4-.2-.8-.4-1.1L13.1 1 7.6 6.6C7.2 7 7 7.5 7 8v11c0 1.1.9 2 2 2h8c.8 0 1.5-.5 1.8-1.2l3-7c.1-.2.2-.5.2-.8v-2z" fill="#2fd16f"></path></svg>';
@@ -341,3 +342,98 @@ var STC={
   function place(){sb.style.top=tb.offsetHeight+'px'}place();window.addEventListener('resize',place);
   if(window.ResizeObserver)new ResizeObserver(place).observe(tb);
 })();
+
+
+var _inboxUnsub = null;
+function stInboxListen(user) {
+  if (!user) return;
+  var topbar = document.getElementById('topbar');
+  if (!topbar || document.getElementById('inbox-btn')) return;
+
+  var btn = document.createElement('div');
+  btn.id = 'inbox-wrap';
+  btn.style.cssText = 'position:relative;margin-left:8px;display:flex;align-items:center;';
+  btn.innerHTML = '<button id="inbox-btn" style="height:36px;padding:0 12px;background:#2a2a2a;border:2px solid #ff6a00;color:#ff6a00;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif;display:flex;align-items:center;gap:6px;">📬 Inbox <span id="inbox-badge" style="display:none;background:#ff5a5a;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;align-items:center;justify-content:center;font-weight:900;">0</span></button>' +
+                  '<div id="inbox-dropdown" style="display:none;position:absolute;right:0;top:46px;width:320px;max-height:400px;background:#1a1a1a;border:2px solid #ff6a00;z-index:999;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.5);"></div>';
+  
+  var authArea = document.getElementById('auth-area');
+  topbar.insertBefore(btn, authArea);
+
+  var dropdown = document.getElementById('inbox-dropdown');
+  var badge = document.getElementById('inbox-badge');
+
+  btn.querySelector('button').onclick = function(e) {
+    e.stopPropagation();
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    if (dropdown.style.display === 'block') {
+      // Clear badge count
+      badge.style.display = 'none';
+      badge.innerText = '0';
+      // Mark notifications read
+      db.collection('notifications').where('targetUid', '==', user.uid).where('read', '==', false).get().then(function(snap) {
+        snap.forEach(function(d) { d.ref.update({ read: true }); });
+      });
+    }
+  };
+
+  document.addEventListener('click', function() { dropdown.style.display = 'none'; });
+
+  // Listen to notifications
+  _inboxUnsub = db.collection('notifications').where('targetUid', '==', user.uid).orderBy('createdAt', 'desc').onSnapshot(function(snap) {
+    var unread = 0;
+    var html = '';
+    if (snap.empty) {
+      dropdown.innerHTML = '<div style="padding:16px;font-size:12px;color:#666;text-align:center;">No notifications yet.</div>';
+      return;
+    }
+    snap.forEach(function(doc) {
+      var n = doc.data();
+      if (!n.read) unread++;
+      var link = n.link || '#';
+      html += '<a href="' + link + '" style="display:block;padding:12px;border-bottom:1px solid #2a2a2a;text-decoration:none;color:#f1f1f1;background:' + (n.read ? '#1a1a1a' : '#222') + ';">' +
+                '<div style="font-size:12px;font-weight:900;color:#ff6a00;">' + esc(n.title || 'Notification') + '</div>' +
+                '<div style="font-size:12px;color:#ccc;margin-top:2px;">' + esc(n.text || '') + '</div>' +
+              '</a>';
+    });
+    dropdown.innerHTML = html;
+    if (unread > 0) {
+      badge.style.display = 'flex';
+      badge.innerText = unread;
+    } else {
+      badge.style.display = 'none';
+    }
+  });
+
+  // Listen to point gifts popup
+  db.collection('point_gifts').where('targetUid', '==', user.uid).where('claimed', '==', false).onSnapshot(function(snap) {
+    snap.forEach(function(doc) {
+      var gift = doc.data();
+      var giftId = doc.id;
+      if (document.getElementById('gift-modal-' + giftId)) return;
+
+      var modal = document.createElement('div');
+      modal.id = 'gift-modal-' + giftId;
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
+      modal.innerHTML = '<div style="background:#1a1a1a;border:2px solid #ff6a00;padding:30px;width:380px;text-align:center;">' +
+                          '<h2 style="font-family:'Bangers',Impact,fantasy;font-size:26px;color:#ff6a00;margin-bottom:12px;">🎁 POINT GIFT!</h2>' +
+                          '<p style="font-size:14px;color:#ccc;margin-bottom:20px;">You received a gift of <b>' + gift.points + ' SomaliPoints</b> from Admin!</p>' +
+                          '<button id="claim-gift-' + giftId + '" style="width:100%;height:40px;background:#ff6a00;border:none;color:#fff;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif;">Claim Points</button>' +
+                        '</div>';
+      document.body.appendChild(modal);
+
+      document.getElementById('claim-gift-' + giftId).onclick = function() {
+        var walletRef = db.collection('wallets').doc(user.uid);
+        db.runTransaction(function(t) {
+          return t.get(walletRef).then(function(wDoc) {
+            var cur = wDoc.exists ? (wDoc.data().points || 0) : 0;
+            t.set(walletRef, { points: cur + gift.points }, { merge: true });
+            t.update(db.collection('point_gifts').doc(giftId), { claimed: true });
+          });
+        }).then(function() {
+          modal.remove();
+          alert('Successfully claimed ' + gift.points + ' points!');
+        }).catch(function(err) { alert('Error: ' + err.message); });
+      };
+    });
+  });
+}

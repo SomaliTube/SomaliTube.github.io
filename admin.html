@@ -65,7 +65,25 @@ body{background:#0b0b0b;background-image:linear-gradient(rgba(255,106,0,.06) 1px
   <textarea id="msgin" maxlength="500" style="width:100%;min-height:120px;background:#141414;border:2px solid #ff6a00;color:#f1f1f1;font:15px 'Share Tech Mono',monospace;padding:12px;outline:none"></textarea>
   <div style="display:flex;align-items:center;gap:12px;margin-top:10px"><button class="btn" onclick="saveMsg()">SAVE MESSAGE</button><span id="msgok" class="hint"></span></div>
 </div>
-<div id="list"><div class="empty">loading...</div></div></main>
+<div id="list"><div class="empty">loading...</div></div>
+    <div class="admin-section" style="background:#1e1e1e;border:2px solid #ff6a00;padding:20px;margin-bottom:24px;">
+      <h2 style="font-family:'Bangers',Impact,fantasy;font-size:22px;color:#ff6a00;margin-bottom:12px;">🎁 Gift SomaliPoints</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+        <input type="text" id="gift-uid" placeholder="Recipient User UID" style="flex:1;min-width:220px;height:36px;background:#2a2a2a;border:2px solid #333;color:#fff;padding:0 10px;font-family:'Nunito',sans-serif;outline:none;">
+        <input type="number" id="gift-pts" placeholder="Points amount" style="width:140px;height:36px;background:#2a2a2a;border:2px solid #333;color:#fff;padding:0 10px;font-family:'Nunito',sans-serif;outline:none;">
+        <button id="send-gift-btn" style="height:36px;padding:0 20px;background:#ff6a00;border:none;color:#fff;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif;">Send Gift</button>
+      </div>
+    </div>
+
+    <div class="admin-section" style="background:#1e1e1e;border:2px solid #ff6a00;padding:20px;margin-bottom:24px;">
+      <h2 style="font-family:'Bangers',Impact,fantasy;font-size:22px;color:#ff6a00;margin-bottom:12px;">🎟️ Create Redeem Code</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+        <input type="text" id="code-text" placeholder="Enter Code (e.g. SOMALI100)" style="flex:1;min-width:220px;height:36px;background:#2a2a2a;border:2px solid #333;color:#fff;padding:0 10px;font-family:'Nunito',sans-serif;outline:none;">
+        <input type="number" id="code-pts" placeholder="Points reward" style="width:140px;height:36px;background:#2a2a2a;border:2px solid #333;color:#fff;padding:0 10px;font-family:'Nunito',sans-serif;outline:none;">
+        <button id="create-code-btn" style="height:36px;padding:0 20px;background:#ff6a00;border:none;color:#fff;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif;">Create Code</button>
+      </div>
+    </div>
+    </main>
 <footer>&copy; 2026 SomaliTube. | Contact: <a href="mailto:arneper606@gmail.com">arneper606@gmail.com</a></footer>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script><script src="st.js"></script>
 <script>
@@ -102,4 +120,42 @@ function numberAll(){var todo=users.filter(function(u){return !u.userNumber}).so
   todo.forEach(function(u){nxt++;bt.update(db.collection('users').doc(u.id),{userNumber:nxt})});bt.set(db.collection('counters').doc('users'),{n:nxt});
   bt.commit().then(function(){alert('Done!');load()}).catch(function(e){alert(e.message)})}
 function unban(uid){if(!confirm('Unban '+nameOf(uid)+'?'))return;db.collection('bans').doc(uid).delete().then(load)}
-</script></body></html>
+</script><script>
+      setTimeout(function() {
+        var sendGiftBtn = document.getElementById('send-gift-btn');
+        if (sendGiftBtn) {
+          sendGiftBtn.addEventListener('click', function() {
+            var uid = document.getElementById('gift-uid').value.trim();
+            var pts = parseInt(document.getElementById('gift-pts').value);
+            if (!uid || isNaN(pts) || pts <= 0) { alert('Enter valid UID and points.'); return; }
+            db.collection('point_gifts').add({
+              targetUid: uid,
+              points: pts,
+              claimed: false,
+              createdAt: new Date().toISOString()
+            }).then(function() {
+              alert('Gift sent successfully!');
+              document.getElementById('gift-uid').value = '';
+              document.getElementById('gift-pts').value = '';
+            }).catch(function(err) { alert('Error: ' + err.message); });
+          });
+        }
+
+        var createCodeBtn = document.getElementById('create-code-btn');
+        if (createCodeBtn) {
+          createCodeBtn.addEventListener('click', function() {
+            var code = document.getElementById('code-text').value.trim().toUpperCase();
+            var pts = parseInt(document.getElementById('code-pts').value);
+            if (!code || isNaN(pts) || pts <= 0) { alert('Enter valid code and points.'); return; }
+            db.collection('redeem_codes').doc(code).set({
+              points: pts,
+              createdAt: new Date().toISOString()
+            }).then(function() {
+              alert('Redeem code created!');
+              document.getElementById('code-text').value = '';
+              document.getElementById('code-pts').value = '';
+            }).catch(function(err) { alert('Error: ' + err.message); });
+          });
+        }
+      }, 1000);
+    </script></body></html>

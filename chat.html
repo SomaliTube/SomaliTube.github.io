@@ -9,18 +9,17 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #111; color: #f1f1f1; font-family: 'Nunito', Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-    a { color: inherit; text-decoration: none; }
     #topbar { background: #1a1a1a; border-bottom: 4px solid #ff6a00; height: 68px; display: flex; align-items: center; padding: 0 16px; gap: 10px; position: sticky; top: 0; z-index: 100; }
-    #logo { font-family: 'Bangers', Impact, fantasy; font-size: 28px; color: #fff; letter-spacing: 2px; text-shadow: 3px 3px 0px #ff6a00; white-space: nowrap; }
+    #logo { font-family: 'Bangers', Impact, fantasy; font-size: 28px; color: #fff; text-decoration: none; letter-spacing: 2px; text-shadow: 3px 3px 0px #ff6a00; white-space: nowrap; }
     #auth-area { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 
     main.chat-container { flex: 1; display: flex; height: calc(100vh - 68px); max-width: 1200px; width: 100%; margin: 0 auto; background: #181818; border-left: 2px solid #2a2a2a; border-right: 2px solid #2a2a2a; }
 
     /* Left Sidebar: Contacts */
-    .contacts-panel { width: 320px; border-right: 2px solid #2a2a2a; display: flex; flex-direction: column; background: #1a1a1a; flex-shrink: 0; }
-    .contacts-header { padding: 16px; border-bottom: 2px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    .contacts-header h2 { font-family: 'Bangers', Impact, fantasy; font-size: 22px; color: #ff6a00; letter-spacing: 1px; white-space: nowrap; }
-    .add-person-btn { background: #ff6a00; color: #fff; border: none; padding: 6px 10px; font-weight: 900; font-size: 11px; cursor: pointer; font-family: 'Nunito', sans-serif; white-space: nowrap; flex-shrink: 0; }
+    .contacts-panel { width: 320px; border-right: 2px solid #2a2a2a; display: flex; flex-direction: column; background: #1a1a1a; }
+    .contacts-header { padding: 16px; border-bottom: 2px solid #2a2a2a; display: flex; justify-space-between; align-items: center; }
+    .contacts-header h2 { font-family: 'Bangers', Impact, fantasy; font-size: 22px; color: #ff6a00; letter-spacing: 1px; }
+    .add-person-btn { background: #ff6a00; color: #fff; border: none; padding: 6px 12px; font-weight: 900; font-size: 12px; cursor: pointer; font-family: 'Nunito', sans-serif; }
     .add-person-btn:hover { background: #e05a00; }
     .contacts-list { flex: 1; overflow-y: auto; }
     .contact-card { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #262626; cursor: pointer; transition: background 0.15s; position: relative; }
@@ -35,17 +34,13 @@
     .dropdown-item:hover { background: #ff5a5a; color: #fff; }
 
     /* Right Side: Chat Window */
-    .chat-window { flex: 1; display: flex; flex-direction: column; background: #111; min-width: 0; }
+    .chat-window { flex: 1; display: flex; flex-direction: column; background: #111; }
     .chat-header { padding: 16px; background: #1a1a1a; border-bottom: 2px solid #2a2a2a; display: flex; align-items: center; gap: 12px; }
     .chat-header .active-title { font-family: 'Bangers', Impact, fantasy; font-size: 20px; color: #ff6a00; letter-spacing: 1px; }
     .messages-box { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-    .msg-row { display: flex; align-items: flex-end; gap: 8px; max-width: 75%; }
-    .msg-row.me { align-self: flex-end; flex-direction: row-reverse; }
-    .msg-row.them { align-self: flex-start; }
-    .msg-bubble { padding: 10px 14px; font-size: 13px; line-height: 1.4; border-radius: 4px; word-break: break-word; }
-    .msg-row.me .msg-bubble { background: #ff6a00; color: #fff; font-weight: 700; }
-    .msg-row.them .msg-bubble { background: #2a2a2a; color: #f1f1f1; border: 1px solid #333; }
-
+    .msg-bubble { max-width: 70%; padding: 10px 14px; font-size: 13px; line-height: 1.4; border-radius: 4px; word-break: break-word; }
+    .msg-bubble.me { align-self: flex-end; background: #ff6a00; color: #fff; font-weight: 700; }
+    .msg-bubble.them { align-self: flex-start; background: #2a2a2a; color: #f1f1f1; border: 1px solid #333; }
     .chat-input-area { padding: 16px; background: #1a1a1a; border-top: 2px solid #2a2a2a; display: flex; gap: 10px; }
     .chat-input { flex: 1; height: 40px; background: #2a2a2a; border: 2px solid #333; color: #fff; font-size: 13px; padding: 0 12px; outline: none; font-family: 'Nunito', sans-serif; }
     .chat-input:focus { border-color: #ff6a00; }
@@ -82,7 +77,6 @@
     <!-- Active Chat Conversation -->
     <div class="chat-window">
       <div class="chat-header">
-        <div id="header-avatar-wrap"></div>
         <span class="active-title" id="chat-title">Select a contact to start chatting</span>
       </div>
       <div class="messages-box" id="messages-box"></div>
@@ -173,7 +167,6 @@
       await db.collection('users').doc(me.uid).collection('contacts').doc(uid).delete();
       if (activeContact && activeContact.uid === uid) {
         activeContact = null;
-        document.getElementById('header-avatar-wrap').innerHTML = '';
         document.getElementById('chat-title').innerText = 'Select a contact to start chatting';
         document.getElementById('messages-box').innerHTML = '';
         document.getElementById('chat-input').disabled = true;
@@ -183,8 +176,7 @@
 
     function selectContact(uid, name) {
       activeContact = { uid: uid, name: name };
-      document.getElementById('header-avatar-wrap').innerHTML = stAv(name, uid, 36);
-      document.getElementById('chat-title').innerText = name;
+      document.getElementById('chat-title').innerText = 'Chat with ' + name;
       document.getElementById('chat-input').disabled = false;
       document.getElementById('send-btn').disabled = false;
 
@@ -198,16 +190,10 @@
           box.innerHTML = '';
           snap.forEach(function(doc) {
             var msg = doc.data();
-            var isMe = msg.sender === me.uid;
-            var senderUid = isMe ? me.uid : uid;
-            var senderName = isMe ? (me.displayName || 'Me') : name;
-
-            var row = document.createElement('div');
-            row.className = 'msg-row ' + (isMe ? 'me' : 'them');
-            row.innerHTML =
-              stAv(senderName, senderUid, 30) +
-              '<div class="msg-bubble">' + esc(msg.text) + '</div>';
-            box.appendChild(row);
+            var bubble = document.createElement('div');
+            bubble.className = 'msg-bubble ' + (msg.sender === me.uid ? 'me' : 'them');
+            bubble.innerText = msg.text;
+            box.appendChild(bubble);
           });
           box.scrollTop = box.scrollHeight;
         });
