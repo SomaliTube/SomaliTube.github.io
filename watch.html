@@ -106,7 +106,7 @@
     $('lb').onclick = function() { vote('like'); }; $('disb').onclick = function() { vote('dislike'); };
     $('sbtn').onclick = toggleSub;
     likes(); loadSubs();
-    STC.init(likeId, $('comments'));
+    STC.init(likeId, $('comments'), v.uid, vid);
     watchQuest();
   }
   /* quest: counts 15 seconds while the tab is open (and the video is playing, if it is a file) */
@@ -134,7 +134,7 @@
   function toggleSub() {
     if (!cu) return location.href = 'login.html';
     var ref = db.collection('users').doc(upUid).collection('subscribers').doc(cu.uid);
-    var was = subbed; (was ? ref.delete() : ref.set({ uid: cu.uid })).then(function() { if (!was) stAct('sub'); try { sessionStorage.removeItem('stb2'); } catch (e) {} loadSubs(); });
+    var was = subbed; (was ? ref.delete() : ref.set({ uid: cu.uid })).then(function() { if (!was) { stAct('sub'); stNotify(upUid, 'sub'); } try { sessionStorage.removeItem('stb2'); } catch (e) {} loadSubs(); });
   }
 
   /* up next */

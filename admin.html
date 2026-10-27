@@ -58,12 +58,27 @@ body{background:#0b0b0b;background-image:linear-gradient(rgba(255,106,0,.06) 1px
 <div id="topbar"><a href="index.html" id="logo">SOMALITUBE!!!!</a><a href="channels.html" class="topbar-btn outline" style="margin-left:auto">Everi chanal</a><div id="upload-btn-wrap"></div><div id="auth-area"><a href="login.html" class="auth-btn outline">Log In</a><a href="signup.html" class="auth-btn">Sign Up</a></div></div><main style="max-width:980px">
 <div class="term"><b>owner@somalitube</b>:~# ./admin --god-mode<span class="cur"></span></div>
 <div class="dash-title" style="text-shadow:3px 3px 0 #ff4444">ADMIN PANEL</div>
-<div class="tabs"><button class="tab on" id="t-users" onclick="tab('users')">USERS</button><button class="tab" id="t-vids" onclick="tab('vids')">VIDEOS</button><button class="tab" id="t-bans" onclick="tab('bans')">BANNED</button><button class="tab" id="t-msg" onclick="tab('msg')">MESSAGE</button><button class="tab" onclick="numberAll()" title="Give ids to accounts made before the id system">NUMBER OLD USERS</button></div>
+<div class="tabs"><button class="tab on" id="t-users" onclick="tab('users')">USERS</button><button class="tab" id="t-vids" onclick="tab('vids')">VIDEOS</button><button class="tab" id="t-bans" onclick="tab('bans')">BANNED</button><button class="tab" id="t-msg" onclick="tab('msg')">MESSAGE</button><button class="tab" id="t-gift" onclick="tab('gift')">GIFT POINTS</button><button class="tab" id="t-codes" onclick="tab('codes')">CODES</button><button class="tab" onclick="numberAll()" title="Give ids to accounts made before the id system">NUMBER OLD USERS</button></div>
 <input type="text" id="q" class="srch" placeholder="search..." oninput="draw()">
 <div id="msgpanel" style="display:none">
   <div class="term" style="margin-bottom:10px"><b>&gt;</b> edit homepage message (shows in de orange box)</div>
   <textarea id="msgin" maxlength="500" style="width:100%;min-height:120px;background:#141414;border:2px solid #ff6a00;color:#f1f1f1;font:15px 'Share Tech Mono',monospace;padding:12px;outline:none"></textarea>
   <div style="display:flex;align-items:center;gap:12px;margin-top:10px"><button class="btn" onclick="saveMsg()">SAVE MESSAGE</button><span id="msgok" class="hint"></span></div>
+</div>
+<div id="giftpanel" style="display:none">
+  <div class="term" style="margin-bottom:10px"><b>&gt;</b> gift somalipoints. they get a popup with a claim button next time they are on.</div>
+  <label class="f">USER ID (or exact username)</label><input type="text" id="g-uid" placeholder="paste the uid here" autocomplete="off">
+  <div class="hint" id="g-who"></div>
+  <label class="f">HOW MANY POINTS</label><input type="text" id="g-amt" placeholder="e.g. 100" inputmode="numeric" autocomplete="off">
+  <div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="btn" id="g-send" onclick="sendGift()">SEND GIFT</button><span id="g-msg" class="hint"></span></div>
+</div>
+<div id="codepanel" style="display:none">
+  <div class="term" style="margin-bottom:10px"><b>&gt;</b> make a redeem code. people type it at redeem.html. one use per person.</div>
+  <label class="f">CODE (leave empty for a random one)</label><input type="text" id="c-code" maxlength="30" placeholder="e.g. WELCOME100" autocomplete="off">
+  <label class="f">POINTS IT GIVES</label><input type="text" id="c-pts" placeholder="e.g. 50" inputmode="numeric" autocomplete="off">
+  <div style="display:flex;align-items:center;gap:12px;margin-top:14px"><button class="btn" onclick="makeCode()">CREATE CODE</button><span id="c-msg" class="hint"></span></div>
+  <div class="term" style="margin:26px 0 10px"><b>&gt;</b> existing codes</div>
+  <div id="c-list"></div>
 </div>
 <div id="list"><div class="empty">loading...</div></div></main>
 <footer>&copy; 2026 SomaliTube. | Contact: <a href="mailto:arneper606@gmail.com">arneper606@gmail.com</a></footer>
@@ -77,7 +92,26 @@ function load(){Promise.all([db.collection('users').get(),db.collection('videos'
   users=r[0].docs.map(function(d){var x=d.data();x.id=d.id;return x});
   vids=r[1].docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(a,b){return b.createdAt<a.createdAt?-1:1});
   bans={};r[2].forEach(function(d){bans[d.id]=d.data()});draw()}).catch(function(e){$('list').innerHTML='<div class="empty">error: '+esc(e.message)+'</div>'})}
-function tab(t){cur=t;['users','vids','bans','msg'].forEach(function(k){$('t-'+k).className='tab'+(k===t?' on':'')});var m=t==='msg';$('msgpanel').style.display=m?'block':'none';$('list').style.display=m?'none':'block';$('q').style.display=m?'none':'block';if(m)db.collection('site').doc('message').get().then(function(d){$('msgin').value=d.exists?(d.data().text||''):''});else draw()}
+function tab(t){cur=t;['users','vids','bans','msg','gift','codes'].forEach(function(k){$('t-'+k).className='tab'+(k===t?' on':'')});
+  var other=t==='msg'||t==='gift'||t==='codes';$('msgpanel').style.display=t==='msg'?'block':'none';$('giftpanel').style.display=t==='gift'?'block':'none';$('codepanel').style.display=t==='codes'?'block':'none';
+  $('list').style.display=other?'none':'block';$('q').style.display=other?'none':'block';
+  if(t==='msg')db.collection('site').doc('message').get().then(function(d){$('msgin').value=d.exists?(d.data().text||''):''});else if(t==='codes')loadCodes();else if(!other)draw()}
+/* ---- gift points ---- */
+function findUser(v){v=(v||'').trim();if(!v)return null;var a=users.filter(function(u){return u.id===v})[0];if(a)return a;var l=v.toLowerCase(),b=users.filter(function(u){return (u.username||'').toLowerCase()===l});return b.length===1?b[0]:null}
+document.addEventListener('input',function(e){if(e.target.id!=='g-uid')return;var u=findUser(e.target.value);$('g-who').textContent=u?'\u2192 '+u.username+' ('+u.id+')':(e.target.value.trim()?'no user found':'')});
+function sendGift(){var u=findUser($('g-uid').value),n=Math.floor(Number($('g-amt').value)),m=$('g-msg');m.style.color='#ff4444';
+  if(!u){m.textContent='no user with that id';return}if(!(n>=1&&n<=1000000)){m.textContent='points must be 1 to 1000000';return}
+  if(!confirm('Gift '+n+' SomaliPoints to '+u.username+'?'))return;$('g-send').disabled=true;
+  db.collection('gifts').add({to:u.id,from:me.uid,fromName:String(me.displayName||'SomaliTube').slice(0,40),amount:n,at:new Date().toISOString(),claimed:false}).then(function(){m.style.color='#44ff88';m.textContent='sent '+n+' points to '+u.username+'. they get a popup next time they are on.';$('g-amt').value='';$('g-send').disabled=false}).catch(function(e){m.textContent='error: '+e.message;$('g-send').disabled=false})}
+/* ---- redeem codes ---- */
+function randCode(){var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s='';for(var i=0;i<8;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
+function makeCode(){var code=($('c-code').value.trim()||randCode()).toUpperCase(),n=Math.floor(Number($('c-pts').value)),m=$('c-msg');m.style.color='#ff4444';
+  if(!/^[A-Z0-9_-]{3,30}$/.test(code)){m.textContent='code can only have letters, numbers, - and _ (3 to 30 chars)';return}if(!(n>=1&&n<=1000000)){m.textContent='points must be 1 to 1000000';return}
+  var r=db.collection('codes').doc(code);r.get().then(function(d){if(d.exists){m.textContent='that code already exists';return}
+    return r.set({points:n,createdAt:new Date().toISOString()}).then(function(){m.style.color='#44ff88';m.textContent='created: '+code+' ('+n+' points)';$('c-code').value='';$('c-pts').value='';loadCodes()})}).catch(function(e){m.textContent='error: '+e.message})}
+function loadCodes(){db.collection('codes').get().then(function(q){var a=q.docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(x,y){return (y.createdAt||'')<(x.createdAt||'')?-1:1});
+  $('c-list').innerHTML=a.length?a.map(function(c){return '<div class="urow"><div class="u"><b style="letter-spacing:2px">'+esc(c.id)+'</b><span>'+c.points+' points &middot; '+stDate(c.createdAt)+'</span></div><div class="rb"><button class="btn danger" onclick="delCode(\''+esc(c.id)+'\')">DELETE</button></div></div>'}).join(''):'<div class="empty">no codes yet</div>'}).catch(function(e){$('c-list').innerHTML='<div class="empty">error: '+esc(e.message)+'</div>'})}
+function delCode(id){if(!confirm('Delete code '+id+'?'))return;db.collection('codes').doc(id).delete().then(loadCodes).catch(function(e){alert(e.message)})}
 function saveMsg(){db.collection('site').doc('message').set({text:$('msgin').value.trim(),updatedAt:new Date().toISOString()}).then(function(){$('msgok').textContent='Saved! Refresh de homepage.'}).catch(function(e){$('msgok').textContent='Error: '+e.message})}
 function draw(){var q=$('q').value.toLowerCase().trim(),h='';
   if(cur==='users'){users.filter(function(u){return !q||(u.username||'').toLowerCase().indexOf(q)>-1||(u.email||'').toLowerCase().indexOf(q)>-1}).forEach(function(u){

@@ -33,7 +33,7 @@
     .meta-line + .bio-display { border-top: none; margin-top: 8px; padding-top: 0; }
     .bio-display { font-size: 13px; color: #aaa; line-height: 1.6; margin-top: 12px; padding-top: 12px; border-top: 2px solid #2a2a2a; }
     .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
-    .sub-btn { height: 38px; padding: 0 22px; font-size: 13px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; border: 2px solid #ff6a00; background: #ff6a00; color: #fff; display: inline-flex; align-items: center; width: fit-content; }
+    .sub-btn { text-decoration: none; height: 38px; padding: 0 22px; font-size: 13px; font-weight: 900; font-family: 'Nunito', sans-serif; cursor: pointer; border: 2px solid #ff6a00; background: #ff6a00; color: #fff; display: inline-flex; align-items: center; width: fit-content; }
     .sub-btn.subbed { background: transparent; color: #ff6a00; }
     .sub-btn:hover { background: #e05a00; color: #fff; border-color: #e05a00; }
     .rating-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -164,20 +164,22 @@
 
           var joined = data.createdAt ? new Date(data.createdAt).toLocaleDateString() : 'unknown';
           var metaHTML = '<div class="meta-line">Joined: ' + joined + ' &middot; User ID: ' + (data.userNumber ? '#' + data.userNumber : 'not numbered yet') + '</div>';
-          var bioHTML = bio ? '<div class="bio-display">' + bio + '</div>' : '';
+          var bioHTML = bio ? '<div class="bio-display">' + esc(bio) + '</div>' : '';
+          var mine = currentUser && currentUser.uid === profileUid;
+          var sideBtn = !currentUser ? '' : mine ? '<a href="profile.html" class="sub-btn subbed" id="edit-btn" title="Edit your profile">&#9881;&#65039; Edit</a>' : '<a href="chat.html?uid=' + esc(profileUid) + '" class="sub-btn subbed" id="chat-btn">&#128172; Chat</a>';
 
           wrap.innerHTML =
             '<div class="profile-box">' +
               '<div class="top-row">' +
                 '<div class="avatar" data-pfp="' + profileUid + '" style="background:' + stColor(profileUid) + '">' + initial + '</div>' +
                 '<div class="info">' +
-                  '<h2>' + (data.username||'Unknown') + stSlot(profileUid) + '</h2>' +
+                  '<h2>' + esc(data.username||'Unknown') + stSlot(profileUid) + '</h2>' +
                   '<p><a href="#" id="subs-link" style="color:#aaa;text-decoration:underline;font-weight:900;">' + subCount + ' subscriber' + (subCount !== 1 ? 's' : '') + '</a></p>' +
                   '<p style="margin-top:3px;"><a href="#" id="following-link" style="color:#555;font-size:10px;text-decoration:none;">Following</a></p>' +
                 '</div>' +
               '</div>' +
               metaHTML + bioHTML +
-              '<div class="actions">' + subBtnHTML + ratingHTML + '</div>' +
+              '<div class="actions"><div style="display:flex;gap:10px;flex-wrap:wrap">' + subBtnHTML + sideBtn + '</div>' + ratingHTML + '</div>' +
             '</div>';
 
           document.getElementById('videos-section').style.display = 'block';
@@ -205,7 +207,7 @@
           if (subBtn) subBtn.addEventListener('click', function() {
             if (!currentUser) return;
             var ref = db.collection('users').doc(profileUid).collection('subscribers').doc(currentUser.uid);
-            if (isSubbed) ref.delete().then(loadProfile); else ref.set({ uid: currentUser.uid }).then(function() { stAct('sub'); loadProfile(); });
+            if (isSubbed) ref.delete().then(loadProfile); else ref.set({ uid: currentUser.uid }).then(function() { stAct('sub'); stNotify(profileUid, 'sub'); loadProfile(); });
           });
           var likeBtn = document.getElementById('like-btn');
           if (likeBtn) likeBtn.addEventListener('click', function() {
@@ -263,7 +265,7 @@
         div.innerHTML =
           '<div class="post-header">' +
             '<div class="post-avatar" data-pfp="' + profileUid + '" style="background:' + stColor(profileUid) + '">' + initial + '</div>' +
-            '<span class="post-username">' + (p.username||'Unknown') + '</span>' + stSlot(p.uid||profileUid) +
+            '<span class="post-username">' + esc(p.username||'Unknown') + '</span>' + stSlot(p.uid||profileUid) +
             '<span class="post-time">' + date + '</span>' +
           '</div>' +
           '<div class="post-text">' + p.text.replace(/</g,'&lt;') + '</div>' +
@@ -276,6 +278,8 @@
           '</div>';
         list.appendChild(div);
       });
+      /* opened from the inbox: scroll to the post */
+      if (location.hash.indexOf('#post-') === 0) { var el = document.getElementById(location.hash.slice(1)); if (el) { el.scrollIntoView({ block: 'center' }); el.style.borderColor = '#ff6a00'; } }
     });
   }
 
@@ -305,7 +309,7 @@
           '<div class="post-comment">' +
             '<a href="user.html?uid=' + (c.uid||'') + '" class="pc-avatar" data-pfp="' + (c.uid||'') + '" style="background:' + stColor(c.uid) + '">' + initial + '</a>' +
             '<div class="pc-body">' +
-              '<div class="pc-username">' + (c.username||'Unknown') + stSlot(c.uid) + '</div>' +
+              '<div class="pc-username">' + esc(c.username||'Unknown') + stSlot(c.uid) + '</div>' +
               '<div class="pc-text">' + c.text.replace(/</g,'&lt;') + '</div>' +
             '</div>' +
           '</div>';
@@ -323,9 +327,10 @@
       username: currentUser.displayName || 'Unknown',
       text: text,
       createdAt: new Date().toISOString()
-    }).then(function() {
+    }).then(function(ref) {
       input.value = '';
       stAct('pcomment');
+      stNotify(profileUid, 'pcomment', { id: 'pc_' + ref.id, text: text, link: 'user.html?uid=' + profileUid + '#post-' + pid });
       loadPostComments(pid);
     }).catch(function(err) {
       alert('Error: ' + err.message);

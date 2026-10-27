@@ -33,6 +33,10 @@
     .pv { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; padding: 14px 0; }
     .pv .big { width: 200px; height: 200px; background: #2a2a2a center / cover no-repeat; border: 3px solid #ff6a00; }
     .pv .lbl { font-size: 11px; font-weight: 900; color: #888; margin-top: 4px; text-align: center; }
+    .redeem-link { display: inline-block; font-size: 13px; font-weight: 900; color: #ff6a00; border: 2px solid #ff6a00; padding: 7px 14px; }
+    .redeem-link:hover { background: #ff6a00; color: #fff; }
+    .gin { height: 38px; background: #2a2a2a; border: 2px solid #333; color: #f1f1f1; font: 13px 'Nunito', sans-serif; padding: 0 10px; outline: none; min-width: 0; }
+    .gin:focus { border-color: #ff6a00; }
     footer { background: #1a1a1a; border-top: 4px solid #ff6a00; padding: 14px 20px; text-align: center; font-size: 12px; color: #666; }
   </style>
 </head>
@@ -51,9 +55,21 @@
   <p class="hint"><b id="cost-line"></b> Bought subs show up as "Bought Sub" in your subscribers list.</p>
   <div id="subs"></div>
 
+  <div><a href="redeem.html" class="redeem-link">&#127903;&#65039; Have a code? Redeem it &rsaquo;</a></div>
+
   <div class="section-label">Profile pics for ur chanal</div>
   <p class="hint">Click a picture to preview it before you buy. Pictures you own can be picked in <a href="profile.html" style="color:#ff6a00;font-weight:900">your profile</a> and in comments.</p>
   <div class="pgrid" id="pics"></div>
+
+  <div class="section-label">Gift SomaliPoints to someone</div>
+  <p class="hint">Send some of ur points to another user. They get a popup with a claim button next time they are on. Type their <b>username</b> or their <b>user id</b> (the letters after uid= on their profile link).</p>
+  <div class="shop-row" style="flex-wrap:wrap">
+    <input id="g-to" class="gin" type="text" placeholder="Username or user id" autocomplete="off" style="flex:2 1 200px">
+    <input id="g-amt" class="gin" type="number" min="1" step="1" placeholder="Points" style="flex:1 1 90px">
+    <button type="button" class="shop-buy" id="g-btn">Gift</button>
+    <div class="hint" id="g-who" style="flex-basis:100%"></div>
+  </div>
+  <div id="g-msg" class="shop-msg"></div>
 </main>
 <footer>&copy; 1972 SomaliTube. No rights reserved. <span style="margin:0 8px;">|</span> Version 1.0</footer>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -151,6 +167,25 @@
     });
     window.addEventListener('stpoints', paint); paint();
   }
+
+  /* ---- gift points ---- */
+  var gTo = null, gTimer = null;
+  $('g-to').oninput = function() {
+    gTo = null; var v = this.value; clearTimeout(gTimer); $('g-who').textContent = '';
+    gTimer = setTimeout(function() { stFindUser(v).then(function(u) { if (v !== $('g-to').value) return; gTo = u; $('g-who').textContent = u ? '\u2192 ' + u.name : (v.trim() ? 'Cant find that person (try their user id)' : ''); }); }, 300);
+  };
+  $('g-btn').onclick = function() {
+    var b = this, amt = Math.floor(Number($('g-amt').value));
+    var m = $('g-msg'); m.className = 'shop-msg bad';
+    if (!gTo) { m.textContent = 'Pick who to gift first.'; return; }
+    if (gTo.uid === cu.uid) { m.textContent = 'U cant gift urself.'; return; }
+    if (!(amt >= 1)) { m.textContent = 'Type how many points.'; return; }
+    if (amt > ST_PTS) { m.textContent = 'U only have ' + stFmt(ST_PTS) + ' points.'; return; }
+    sure(b, 'Gift', function() {
+      stSendGift(gTo.uid, amt).then(function() { m.className = 'shop-msg ok'; m.textContent = 'Sent! ' + stFmt(amt) + ' points are waiting for ' + gTo.name + '.'; $('g-amt').value = ''; b.disabled = false; b.textContent = 'Gift'; })
+        .catch(function(err) { m.textContent = err.message; b.disabled = false; b.textContent = 'Gift'; });
+    });
+  };
 </script>
 </body>
 </html>

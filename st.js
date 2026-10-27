@@ -17,8 +17,8 @@ function stDate(iso){return iso?new Date(iso).toLocaleDateString():''}
 function stNav(user){
   var a=document.getElementById('auth-area');
   if(!user||!a)return;
-  a.innerHTML='<a href="profile.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#f1f1f1">'+stAv(user.displayName,user.uid,38)+'<span style="font-size:13px;font-weight:900">'+esc(user.displayName||'Profile')+'</span></a>'+stPtsPill();
-  stWalletListen(user);
+  a.innerHTML='<button type="button" class="ib-btn" onclick="stToggleInbox(event)" title="Inbox">&#9993;&#65039;<span class="ib-badge" style="display:none"></span></button><a href="user.html?uid='+esc(user.uid)+'" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#f1f1f1">'+stAv(user.displayName,user.uid,38)+'<span style="font-size:13px;font-weight:900">'+esc(user.displayName||'Profile')+'</span></a>'+stPtsPill();
+  stWalletListen(user);stInboxListen(user);stPaintInbox();stGiftCheck(user);
   var ad=document.getElementById('sb-admin');if(ad)ad.style.display=user.uid===OWNER_UID?'flex':'none';
 }
 var ST_UP='<svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 21H3V9h4v12zm14-11c0-1.1-.9-2-2-2h-5.3l.9-4.3v-.3c0-.4-.2-.8-.4-1.1L13.1 1 7.6 6.6C7.2 7 7 7.5 7 8v11c0 1.1.9 2 2 2h8c.8 0 1.5-.5 1.8-1.2l3-7c.1-.2.2-.5.2-.8v-2z" fill="#2fd16f"></path></svg>';
@@ -196,6 +196,83 @@ function stBuyPic(n){var u=auth.currentUser;if(!u)return Promise.reject(new Erro
 '.st-row.bs{cursor:default}.st-row.bs:hover{color:#f1f1f1}';
 document.head.appendChild(c)})();
 
+/* ====================== INBOX ====================== */
+/* someone does something to you -> a small document lands in users/{you}/inbox. Only the sender can write it. */
+function stNotify(to,type,o){var u=auth.currentUser;if(!u||!to||to===u.uid)return Promise.resolve();o=o||{};
+  var doc={type:type,from:u.uid,fromName:String(u.displayName||'Unknown').slice(0,40),text:String(o.text||'').slice(0,140),link:String(o.link||'').slice(0,200),at:new Date().toISOString()};
+  return db.collection('users').doc(to).collection('inbox').doc(o.id||(type+'_'+u.uid)).set(doc).catch(function(){})}
+var ST_INBOX=[],ST_SEEN='',_ibUid=null;
+function stInboxListen(user){if(_ibUid===user.uid)return;_ibUid=user.uid;
+  db.collection('users').doc(user.uid).collection('inbox').orderBy('at','desc').limit(50).onSnapshot(function(q){ST_INBOX=q.docs.map(function(d){var x=d.data();x.id=d.id;return x});stPaintInbox()},function(){});
+  db.collection('inboxSeen').doc(user.uid).onSnapshot(function(s){ST_SEEN=s.exists?(s.data().at||''):'';stPaintInbox()},function(){})}
+function stUnseen(){return ST_INBOX.filter(function(x){return x.at>ST_SEEN}).length}
+function stPaintInbox(){var n=stUnseen();document.querySelectorAll('.ib-badge').forEach(function(e){e.textContent=n>99?'99+':n;e.style.display=n?'flex':'none'});
+  if(document.getElementById('ib-panel')){stDrawInbox();if(n)stMarkSeen()}}
+function stMarkSeen(){var u=auth.currentUser;if(!u)return;var at=new Date().toISOString();ST_INBOX.forEach(function(x){if(x.at>at)at=x.at});if(at<=ST_SEEN)return;
+  ST_SEEN=at;db.collection('inboxSeen').doc(u.uid).set({at:at}).catch(function(){})}
+function stAgo(iso){var s=Math.max(0,(Date.now()-new Date(iso).getTime())/1000);return s<60?'just now':s<3600?Math.floor(s/60)+'m ago':s<86400?Math.floor(s/3600)+'h ago':Math.floor(s/86400)+'d ago'}
+/* links come from other people, so only our own pages are allowed */
+function stSafeLink(l,fallback){return /^(watch|user|chat)\.html([?#][\w=&%.#-]*)?$/.test(l||'')?l:fallback}
+var ST_INB_TXT={sub:'subscribed to you',comment:'commented on your video',reply:'replied to your comment',pcomment:'commented on your post',chat:'sent you a message'};
+function stDrawInbox(){var p=document.getElementById('ib-panel');if(!p)return;var old=p._old||'';
+  var rows=ST_INBOX.map(function(x){var link=stSafeLink(x.link,x.type==='chat'?'chat.html?uid='+encodeURIComponent(x.from):'user.html?uid='+encodeURIComponent(x.from));
+    return '<a class="ib-row'+(x.at>old?' new':'')+'" href="'+esc(link)+'">'+stAv(x.fromName,x.from,38)+'<div class="ib-m"><div class="ib-t"><b>'+esc(x.fromName||'Someone')+'</b> '+(ST_INB_TXT[x.type]||'did something')+(x.text&&x.type!=='sub'?': <span class="ib-q">&ldquo;'+esc(x.text)+'&rdquo;</span>':'')+'</div><div class="ib-time">'+stAgo(x.at)+'</div></div></a>'}).join('');
+  p.querySelector('.ib-list').innerHTML=rows||'<div class="ib-empty">Nothing here yet. When someone subscribes, comments or messages you, it shows up here.</div>'}
+function stToggleInbox(e){if(e)e.stopPropagation();var ex=document.getElementById('ib-panel');if(ex){ex.remove();return}
+  var p=document.createElement('div');p.id='ib-panel';p._old=ST_SEEN;
+  p.innerHTML='<div class="ib-head"><span>Inbox</span><a href="chat.html" class="ib-chats">&#128172; Chats</a><button type="button" class="ib-clear">Clear all</button></div><div class="ib-list"></div>';
+  p.addEventListener('click',function(ev){ev.stopPropagation();if(ev.target.classList.contains('ib-clear')){var b=db.batch();ST_INBOX.forEach(function(x){b.delete(db.collection('users').doc(auth.currentUser.uid).collection('inbox').doc(x.id))});b.commit().catch(function(err){alert(err.message)})}});
+  document.body.appendChild(p);var tb=document.getElementById('topbar');p.style.top=(tb?tb.offsetHeight:68)+'px';stDrawInbox();stMarkSeen()}
+document.addEventListener('click',function(e){var p=document.getElementById('ib-panel');if(p&&!p.contains(e.target))p.remove()});
+
+/* ====================== GIFTS ====================== */
+/* a gift is a document in gifts/. The receiver sees a popup with a CLAIM button the next time they are on the site. */
+function stFindUser(text){text=String(text||'').trim();if(!text||text.indexOf('/')>-1)return Promise.resolve(null);
+  return db.collection('users').doc(text).get().then(function(d){if(d.exists)return {uid:d.id,name:d.data().username||'Unknown'};
+    return db.collection('users').where('username','==',text).get().then(function(q){return q.size===1?{uid:q.docs[0].id,name:q.docs[0].data().username||text}:null})}).catch(function(){return null})}
+function stSendGift(to,amount){var u=auth.currentUser;amount=Math.floor(Number(amount));
+  if(!u)return Promise.reject(new Error('Log in first'));if(!to||to===u.uid)return Promise.reject(new Error('Pick someone else'));if(!(amount>=1&&amount<=100000))return Promise.reject(new Error('Pick an amount from 1 to 100000'));
+  var w=db.collection('wallets').doc(u.uid),g=db.collection('gifts').doc();
+  return db.runTransaction(function(t){return t.get(w).then(function(s){var old=s.exists?(s.data().points||0):0;if(old<amount)throw new Error('Not enough SomaliPoints');
+    t.set(w,{points:old-amount,lastSend:g.id},{merge:true});t.set(g,{to:to,from:u.uid,fromName:String(u.displayName||'Someone').slice(0,40),amount:amount,at:new Date().toISOString(),claimed:false})})})}
+function stClaimGift(id){var u=auth.currentUser,g=db.collection('gifts').doc(id),w=db.collection('wallets').doc(u.uid);
+  return db.runTransaction(function(t){return Promise.all([t.get(g),t.get(w)]).then(function(r){var gd=r[0].data();if(!r[0].exists||gd.to!==u.uid||gd.claimed)throw new Error('This gift was already claimed');
+    t.set(w,{points:(r[1].exists?(r[1].data().points||0):0)+gd.amount,lastGift:id},{merge:true});t.update(g,{claimed:true});return gd.amount})})}
+/* redeem a code made in admin.html */
+function stRedeem(code){var u=auth.currentUser;code=String(code||'').trim().toUpperCase();
+  if(!u)return Promise.reject(new Error('Log in first'));if(!/^[A-Z0-9_-]{3,30}$/.test(code))return Promise.reject(new Error('Wrong code'));
+  var cr=db.collection('codes').doc(code),rr=cr.collection('redeemed').doc(u.uid),w=db.collection('wallets').doc(u.uid);
+  return db.runTransaction(function(t){return Promise.all([t.get(cr),t.get(rr),t.get(w)]).then(function(r){
+    if(!r[0].exists)throw new Error('Wrong code');if(r[1].exists)throw new Error('You already used this code');
+    var pts=r[0].data().points;t.set(w,{points:(r[2].exists?(r[2].data().points||0):0)+pts,lastRedeem:code},{merge:true});t.set(rr,{at:new Date().toISOString()});return pts})})}
+var _gcUid=null;
+function stGiftCheck(user){if(_gcUid===user.uid)return;_gcUid=user.uid;
+  db.collection('gifts').where('to','==',user.uid).where('claimed','==',false).get().then(function(q){var list=q.docs.map(function(d){var x=d.data();x.id=d.id;return x});if(list.length)stGiftPopup(list,0)}).catch(function(){})}
+function stGiftPopup(list,i){var old=document.getElementById('gift-pop');if(old)old.remove();if(i>=list.length)return;var g=list[i];
+  var o=document.createElement('div');o.className='st-modal';o.id='gift-pop';
+  o.innerHTML='<div class="st-box gift-box"><div class="gift-ico">&#127873;</div><div class="gift-t"><b>'+esc(g.fromName||'Someone')+'</b> gifted you</div><div class="gift-n">'+ST_COIN+' '+stFmt(g.amount)+'</div><div class="gift-s">SomaliPoints'+(list.length>1?' &middot; gift '+(i+1)+' of '+list.length:'')+'</div><button type="button" class="gift-claim">CLAIM!</button><button type="button" class="gift-later">Later</button><div class="shop-msg" id="gift-msg"></div></div>';
+  o.addEventListener('click',function(e){if(e.target.classList.contains('gift-later')||e.target===o)return o.remove();
+    if(!e.target.classList.contains('gift-claim'))return;var b=e.target;b.disabled=true;b.textContent='...';
+    stClaimGift(g.id).then(function(){setTimeout(function(){stGiftPopup(list,i+1)},700);b.textContent='Claimed!'}).catch(function(err){var m=o.querySelector('#gift-msg');m.className='shop-msg bad';m.textContent=err.message;b.disabled=false;b.textContent='CLAIM!'})});
+  document.body.appendChild(o)}
+
+(function(){var c=document.createElement('style');c.textContent=
+'.ib-btn{position:relative;height:34px;width:40px;background:transparent;border:2px solid #ff6a00;color:#fff;font-size:17px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}.ib-btn:hover{background:#ff6a00}'+
+'.ib-badge{position:absolute;top:-9px;right:-9px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#ff2b2b;color:#fff;font:900 11px Nunito,sans-serif;align-items:center;justify-content:center;border:2px solid #1a1a1a}'+
+'#ib-panel{position:fixed;right:12px;width:380px;max-width:calc(100vw - 24px);max-height:70vh;display:flex;flex-direction:column;background:#1e1e1e;border:3px solid #ff6a00;z-index:200;box-shadow:6px 6px 0 #000}'+
+'.ib-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:2px solid #2a2a2a;font:22px Bangers,Impact,fantasy;letter-spacing:2px;color:#ff6a00}.ib-head span{flex:1}'+
+'.ib-chats{font:900 12px Nunito,sans-serif;letter-spacing:0;color:#ff6a00;text-decoration:none;border:2px solid #ff6a00;padding:4px 8px}.ib-chats:hover{background:#ff6a00;color:#fff}'+
+'.ib-clear{background:none;border:none;color:#888;font:900 12px Nunito,sans-serif;letter-spacing:0;cursor:pointer}.ib-clear:hover{color:#ff4444}'+
+'.ib-list{overflow-y:auto}.ib-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #2a2a2a;color:#f1f1f1;text-decoration:none}.ib-row:hover{background:#262626}.ib-row.new{background:#2a1608;border-left:4px solid #ff6a00}'+
+'.ib-m{min-width:0}.ib-t{font-size:13px;line-height:1.4;overflow-wrap:anywhere}.ib-t b{color:#ff6a00}.ib-q{color:#bbb}.ib-time{font-size:11px;color:#666;margin-top:2px}.ib-empty{padding:22px 16px;font-size:13px;color:#777;line-height:1.5}'+
+'.comment.hl{border-color:#ff6a00;background:#2a1608;animation:hlf 2.5s ease-out}@keyframes hlf{0%{box-shadow:0 0 0 6px rgba(255,106,0,.6)}100%{box-shadow:0 0 0 0 rgba(255,106,0,0)}}'+
+'.gift-box{max-width:360px;text-align:center;padding:26px 22px;align-items:center;gap:6px}.gift-ico{font-size:60px;line-height:1}.gift-t{font-size:16px;font-weight:900;color:#f1f1f1}.gift-t b{color:#ff6a00}'+
+'.gift-n{display:flex;align-items:center;justify-content:center;gap:10px;font:56px Bangers,Impact,fantasy;letter-spacing:2px;color:#fff}.gift-n .pts-coin{width:44px;height:44px}.gift-s{font-size:13px;font-weight:900;color:#ff6a00;margin-bottom:10px}'+
+'.gift-claim{width:100%;height:52px;background:#2fd16f;border:none;color:#111;font:26px Bangers,Impact,fantasy;letter-spacing:3px;cursor:pointer;animation:qpulse2 1.6s infinite}.gift-claim:disabled{opacity:.7;animation:none}'+
+'@keyframes qpulse2{0%,100%{box-shadow:0 0 0 0 rgba(47,209,111,.7)}50%{box-shadow:0 0 0 7px rgba(47,209,111,0)}}'+
+'.gift-later{background:none;border:none;color:#777;font:900 12px Nunito,sans-serif;cursor:pointer;margin-top:6px}.gift-later:hover{color:#fff}';
+document.head.appendChild(c)})();
+
 /* ---------- Ban screen ---------- */
 function stBanScreen(b){
   if(document.getElementById('banscreen'))return;
@@ -283,19 +360,26 @@ async function stCompressVideo(file,onProg,onNote){
 
 /* ---------- Comments: replies, edit, delete, read more ---------- */
 var STC={
-  init:function(vid,root){STC.root=root;STC.col=db.collection('videoComments').doc(vid).collection('comments');root.addEventListener('click',STC.click);auth.onAuthStateChanged(STC.load)},
+  init:function(vid,root,owner,realVid){STC.owner=owner||null;STC.vid=realVid||null;STC.root=root;STC.col=db.collection('videoComments').doc(vid).collection('comments');root.addEventListener('click',STC.click);auth.onAuthStateChanged(STC.load)},
   load:function(){STC.col.orderBy('createdAt','desc').get().then(function(s){STC.all=[];s.forEach(function(d){var c=d.data();c.id=d.id;STC.all.push(c)});STC.render()}).catch(function(e){STC.all=[];STC.render();STC.root.insertAdjacentHTML('beforeend','<div class="hint" style="color:#ff4444;margin-top:10px">Could not load comments: '+esc(e.message)+'</div>')})},
   item:function(c,me){var long=c.text.length>250||(c.text.match(/\n/g)||[]).length>3,own=me&&me.uid===c.uid,canDel=me&&(own||me.uid===OWNER_UID),rp=!!c.parentId;
-    return '<div class="comment'+(rp?' reply':'')+'" data-id="'+c.id+'" data-top="'+(c.parentId||c.id)+'" data-name="'+esc(c.username)+'"><div class="c-head">'+stAv(c.username,c.uid,34,'user.html?uid='+esc(c.uid))+'<a class="c-user" href="user.html?uid='+esc(c.uid)+'">'+esc(c.username||'Unknown')+'</a>'+stSlot(c.uid)+'<span class="c-time">'+stDate(c.createdAt)+(c.edited?' (edited)':'')+'</span></div><div class="c-text'+(long?' clamp':'')+'">'+esc(c.text)+'</div>'+STC.img(c)+
+    return '<div class="comment'+(rp?' reply':'')+'" id="c-'+c.id+'" data-id="'+c.id+'" data-top="'+(c.parentId||c.id)+'" data-name="'+esc(c.username)+'"><div class="c-head">'+stAv(c.username,c.uid,34,'user.html?uid='+esc(c.uid))+'<a class="c-user" href="user.html?uid='+esc(c.uid)+'">'+esc(c.username||'Unknown')+'</a>'+stSlot(c.uid)+'<span class="c-time">'+stDate(c.createdAt)+(c.edited?' (edited)':'')+'</span></div><div class="c-text'+(long?' clamp':'')+'">'+esc(c.text)+'</div>'+STC.img(c)+
       (long?'<button class="lk" data-act="more">Read more</button>':'')+(me?'<button class="lk" data-act="reply">Reply</button>':'')+(own?'<button class="lk" data-act="edit">Edit</button>':'')+(canDel?'<button class="lk d" data-act="del">Delete</button>':'')+'<div class="slot"></div></div>'},
+  /* tell the video owner (and the person you replied to) */
+  notify:function(cid,text,parentId){var me=auth.currentUser,link='watch.html'+(STC.vid?'?v='+STC.vid:'')+'#c-'+cid,pa=null;
+    if(parentId){var p=STC.all.filter(function(x){return x.id===parentId})[0];pa=p&&p.uid}
+    if(pa)stNotify(pa,'reply',{id:'c_'+cid,text:text,link:link});
+    if(STC.owner&&STC.owner!==pa)stNotify(STC.owner,'comment',{id:'c_'+cid,text:text,link:link})},
   img:function(c){return (c.img&&/^profilepicture\d+\.png$/.test(c.img))?'<img class="cimg" src="'+c.img+'" alt="picture">':''},
   render:function(){var me=auth.currentUser,tops=STC.all.filter(function(c){return!c.parentId}),reps=STC.all.filter(function(c){return c.parentId}).reverse(),h='<div class="section-label">💬 Comments</div>';
     h+=me?'<div class="slot" id="stc-new-slot"><textarea id="stc-new" maxlength="1000" placeholder="Write a comment... (max 1000 chars)"></textarea><div class="cbar"><button class="btn" data-act="post">Post</button><button type="button" class="btn cam" data-act="cam" title="Add a picture">📷</button><span class="cprev"></span></div><div class="cpick" style="display:none"></div></div><br>':'<p class="hint" style="margin-bottom:16px"><a href="login.html" style="color:#ff6a00">Log in</a> to comment.</p>';
     if(!tops.length)h+='<div class="hint">No comments yet. Be the first! 👀</div>';
-    tops.forEach(function(c){h+=STC.item(c,me);reps.filter(function(r){return r.parentId===c.id}).forEach(function(r){h+=STC.item(r,me)})});STC.root.innerHTML=h},
+    tops.forEach(function(c){h+=STC.item(c,me);reps.filter(function(r){return r.parentId===c.id}).forEach(function(r){h+=STC.item(r,me)})});STC.root.innerHTML=h;STC.jump()},
+  /* opened from the inbox: scroll to the comment (#c-ID) and flash it */
+  jump:function(){if(STC._j||location.hash.indexOf('#c-')!==0)return;var el=document.getElementById(location.hash.slice(1));if(!el)return;STC._j=1;el.scrollIntoView({block:'center'});el.classList.add('hl')},
   add:function(text,parentId,btn,img){var me=auth.currentUser;text=text.trim();if(!me||(!text&&!img))return;
     if(Date.now()-(STC.last||0)<5000)return alert('Slow down a bit!');STC.last=Date.now();btn.disabled=true;
-    STC.col.add({uid:me.uid,username:me.displayName||'Unknown',text:text.slice(0,1000),createdAt:new Date().toISOString(),parentId:parentId||null,img:(img&&/^profilepicture\d+\.png$/.test(img))?img:null}).then(function(){stAct(parentId?'reply':'comment');if(img)stAct('pic');STC.load()}).catch(function(e){btn.disabled=false;alert(e.message)})},
+    STC.col.add({uid:me.uid,username:me.displayName||'Unknown',text:text.slice(0,1000),createdAt:new Date().toISOString(),parentId:parentId||null,img:(img&&/^profilepicture\d+\.png$/.test(img))?img:null}).then(function(ref){stAct(parentId?'reply':'comment');if(img)stAct('pic');STC.notify(ref.id,text,parentId);STC.load()}).catch(function(e){btn.disabled=false;alert(e.message)})},
   click:function(e){var b=e.target.closest('[data-act]');if(!b)return;var act=b.dataset.act,box=b.closest('.comment'),slot=box&&box.querySelector('.slot'),id=box&&box.dataset.id;
     if(act==='cam'){var sl=b.closest('.slot'),pk=sl.querySelector('.cpick');if(pk.style.display==='none'){pk.style.display='grid';if(!pk.firstChild)stPfpGrid(pk,sl.dataset.img||'',function(f){sl.dataset.img=f;sl.querySelector('.cprev').innerHTML='<img src="'+f+'" alt=""><button type="button" class="lk" data-act="uncam">remove</button>';pk.style.display='none'})}else pk.style.display='none';return}
     if(act==='uncam'){var s2=b.closest('.slot');delete s2.dataset.img;s2.querySelector('.cprev').innerHTML='';s2.querySelector('.cpick').innerHTML='';return}

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chats - SomaliTube</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; color: #f1f1f1; font-family: 'Nunito', Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    a { color: inherit; text-decoration: none; }
+    #topbar { background: #1a1a1a; border-bottom: 4px solid #ff6a00; min-height: 68px; display: flex; flex-wrap: wrap; align-items: center; padding: 8px 16px; gap: 10px; position: sticky; top: 0; z-index: 100; }
+    #logo { font-family: 'Bangers', Impact, fantasy; font-size: 28px; color: #fff; letter-spacing: 2px; text-shadow: 3px 3px 0px #ff6a00; white-space: nowrap; }
+    #auth-area { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    main { flex: 1; max-width: 1000px; width: 100%; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 280px 1fr; gap: 16px; align-items: start; }
+    @media (max-width: 720px) { main { grid-template-columns: 1fr; } }
+    .panel { background: #1e1e1e; border: 2px solid #2a2a2a; display: flex; flex-direction: column; }
+    .panel > h2 { font: 22px 'Bangers', Impact, fantasy; letter-spacing: 2px; color: #ff6a00; padding: 12px 16px; border-bottom: 2px solid #2a2a2a; background: #191919; font-weight: normal; }
+    #list { max-height: 70vh; overflow-y: auto; }
+    .ci { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #2a2a2a; }
+    .ci:hover { background: #262626; }
+    .ci.on { background: #2a1608; border-left: 4px solid #ff6a00; }
+    .ci .t { min-width: 0; }
+    .ci .n { font-size: 14px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ci .l { font-size: 12px; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .empty { padding: 18px 16px; font-size: 13px; color: #777; line-height: 1.5; }
+    #thead { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 2px solid #2a2a2a; background: #191919; font-weight: 900; font-size: 16px; }
+    #thead a:hover { color: #ff6a00; }
+    #msgs { height: 55vh; min-height: 280px; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .m { max-width: 75%; padding: 8px 12px; font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; white-space: pre-wrap; background: #2a2a2a; align-self: flex-start; border-left: 3px solid #555; }
+    .m.me { align-self: flex-end; background: #3a1d08; border-left: 0; border-right: 3px solid #ff6a00; }
+    .m .tm { display: block; font-size: 10px; color: #777; margin-top: 3px; }
+    #send { display: flex; gap: 8px; padding: 12px; border-top: 2px solid #2a2a2a; }
+    #txt { flex: 1; height: 42px; background: #2a2a2a; border: 2px solid #333; color: #f1f1f1; font: 14px 'Nunito', sans-serif; padding: 0 12px; outline: none; }
+    #txt:focus { border-color: #ff6a00; }
+    #go { height: 42px; padding: 0 22px; background: #ff6a00; border: 2px solid #ff6a00; color: #fff; font: 900 14px 'Nunito', sans-serif; cursor: pointer; }
+    #go:hover { background: #e05a00; }
+    #err { font-size: 12px; font-weight: 900; color: #ff5a5a; padding: 0 12px 10px; min-height: 0; }
+    footer { background: #1a1a1a; border-top: 4px solid #ff6a00; padding: 14px 20px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+<div id="topbar">
+  <a href="index.html" id="logo">SOMALITUBE!!!!</a>
+  <div id="upload-btn-wrap"></div>
+  <div id="auth-area"><a href="login.html" class="auth-btn" id="btn-login">Log In</a></div>
+</div>
+<main>
+  <section class="panel"><h2>&#128172; My chats</h2><div id="list"><div class="empty">Loading...</div></div></section>
+  <section class="panel" id="thread"></section>
+</main>
+<footer>&copy; 1972 SomaliTube. No rights reserved. <span style="margin:0 8px;">|</span> Version 1.0</footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="st.js"></script>
+<script>
+  var $ = function(i) { return document.getElementById(i); };
+  var cu = null, other = new URLSearchParams(location.search).get('uid'), otherName = '', unMsgs = null, lastSend = 0;
+  function chatId(a, b) { return [a, b].sort().join('_'); }
+  function hm(iso) { var d = new Date(iso); return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+
+  auth.onAuthStateChanged(function(u) {
+    if (!u) return location.href = 'login.html';
+    cu = u; stNav(u); loadList();
+    if (other) openChat(); else $('thread').innerHTML = '<div class="empty">Pick a chat on the left, or open someones profile and press &#128172; Chat.</div>';
+  });
+
+  /* left side: everybody ive talked to */
+  function loadList() {
+    db.collection('chatList').doc(cu.uid).collection('with').orderBy('at', 'desc').limit(100).onSnapshot(function(q) {
+      $('list').innerHTML = q.docs.length ? q.docs.map(function(d) {
+        var x = d.data();
+        return '<a class="ci' + (d.id === other ? ' on' : '') + '" href="chat.html?uid=' + encodeURIComponent(d.id) + '">' + stAv(x.name, d.id, 40) + '<div class="t"><div class="n">' + esc(x.name || 'Unknown') + '</div><div class="l">' + (x.from === cu.uid ? 'You: ' : '') + esc(x.last) + '</div></div></a>';
+      }).join('') : '<div class="empty">No chats yet. Open someones profile and press &#128172; Chat to start one.</div>';
+    }, function(e) { $('list').innerHTML = '<div class="empty">Could not load chats: ' + esc(e.message) + '</div>'; });
+  }
+
+  /* right side: one conversation */
+  function openChat() {
+    if (other === cu.uid) { $('thread').innerHTML = '<div class="empty">U cant chat with urself :)</div>'; return; }
+    db.collection('users').doc(other).get().then(function(d) {
+      if (!d.exists) { $('thread').innerHTML = '<div class="empty">User not found.</div>'; return; }
+      otherName = d.data().username || 'Unknown';
+      $('thread').innerHTML = '<div id="thead">' + stAv(otherName, other, 40, 'user.html?uid=' + encodeURIComponent(other)) + '<a href="user.html?uid=' + encodeURIComponent(other) + '">' + esc(otherName) + '</a>' + stSlot(other) + '</div>' +
+        '<div id="msgs"><div class="empty">Loading...</div></div><div id="err"></div>' +
+        '<form id="send"><input id="txt" maxlength="500" placeholder="Write a message..." autocomplete="off"><button id="go" type="submit">Send</button></form>';
+      $('send').onsubmit = function(e) { e.preventDefault(); send(); };
+      $('txt').focus();
+      if (unMsgs) unMsgs();
+      unMsgs = db.collection('chats').doc(chatId(cu.uid, other)).collection('messages').orderBy('at', 'asc').limit(300).onSnapshot(function(q) {
+        var box = $('msgs'); if (!box) return;
+        var stick = box.scrollHeight - box.scrollTop - box.clientHeight < 80 || !box.dataset.done;
+        box.innerHTML = q.docs.length ? q.docs.map(function(m) { var x = m.data();
+          return '<div class="m' + (x.from === cu.uid ? ' me' : '') + '">' + esc(x.text) + '<span class="tm">' + hm(x.at) + '</span></div>'; }).join('') : '<div class="empty">No messages yet. Say hi!</div>';
+        box.dataset.done = 1; if (stick) box.scrollTop = box.scrollHeight;
+      }, function(e) { var box = $('msgs'); if (box) box.innerHTML = '<div class="empty">Could not load messages: ' + esc(e.message) + '</div>'; });
+    });
+  }
+
+  function send() {
+    var inp = $('txt'), text = inp.value.trim().slice(0, 500);
+    if (!text) return;
+    if (Date.now() - lastSend < 700) return; lastSend = Date.now();
+    var at = new Date().toISOString(), me = cu.displayName || 'Unknown', b = db.batch();
+    b.set(db.collection('chats').doc(chatId(cu.uid, other)).collection('messages').doc(), { from: cu.uid, text: text, at: at });
+    b.set(db.collection('chatList').doc(cu.uid).collection('with').doc(other), { name: otherName, last: text, at: at, from: cu.uid });
+    b.set(db.collection('chatList').doc(other).collection('with').doc(cu.uid), { name: me, last: text, at: at, from: cu.uid });
+    inp.value = ''; $('err').textContent = '';
+    b.commit().then(function() { stNotify(other, 'chat', { id: 'chat_' + cu.uid, text: text, link: 'chat.html?uid=' + cu.uid }); })
+      .catch(function(e) { $('err').textContent = 'Could not send: ' + e.message; inp.value = text; });
+  }
+</script>
+</body>
+</html>
