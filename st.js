@@ -244,7 +244,9 @@ function stRedeem(code){var u=auth.currentUser;code=String(code||'').trim().toUp
   var cr=db.collection('codes').doc(code),rr=cr.collection('redeemed').doc(u.uid),w=db.collection('wallets').doc(u.uid);
   return db.runTransaction(function(t){return Promise.all([t.get(cr),t.get(rr),t.get(w)]).then(function(r){
     if(!r[0].exists)throw new Error('Wrong code');if(r[1].exists)throw new Error('You already used this code');
-    var pts=r[0].data().points;t.set(w,{points:(r[2].exists?(r[2].data().points||0):0)+pts,lastRedeem:code},{merge:true});t.set(rr,{at:new Date().toISOString()});return pts})})}
+    var cd=r[0].data(),pts=cd.points;
+    /* one-time codes: the first person to redeem it gets it, nobody else ever */
+    if(cd.single){if(cd.claimedBy)throw new Error('This code was already claimed by someone else');t.update(cr,{claimedBy:u.uid,claimedAt:new Date().toISOString()})}t.set(w,{points:(r[2].exists?(r[2].data().points||0):0)+pts,lastRedeem:code},{merge:true});t.set(rr,{at:new Date().toISOString()});return pts})})}
 var _gcUid=null;
 function stGiftCheck(user){if(_gcUid===user.uid)return;_gcUid=user.uid;
   db.collection('gifts').where('to','==',user.uid).where('claimed','==',false).get().then(function(q){var list=q.docs.map(function(d){var x=d.data();x.id=d.id;return x});if(list.length)stGiftPopup(list,0)}).catch(function(){})}
