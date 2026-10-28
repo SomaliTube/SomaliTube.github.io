@@ -168,7 +168,7 @@ function stPtsPill(){return '<button type="button" class="pts-pill" onclick="stS
 function stShop(){location.href='shop.html'}
 var SHOP_SIZES=[1,5,10,50,100];
 /* profile pictures for sale: profilepicture21.png ... profilepicture30.png. 21 costs 10 points, every next one 10 more. */
-var PIC_FIRST=21,PIC_LAST=30,PIC_STEP=10;
+var PIC_FIRST=21,PIC_LAST=35,PIC_STEP=10;
 function stPicFile(n){return 'profilepicture'+n+'.png'}
 function stPicPrice(n){return (n-PIC_FIRST+1)*PIC_STEP}
 /* the files you own from the shop, like ["profilepicture21.png"] */
